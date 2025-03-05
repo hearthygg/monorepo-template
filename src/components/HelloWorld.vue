@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 defineProps<{ msg: string }>()
 
-const count = ref(666)
+const count = ref(656)
 
 
 </script>
