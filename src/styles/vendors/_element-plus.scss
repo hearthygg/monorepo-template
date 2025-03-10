@@ -1,0 +1,54 @@
+/* Custom styles for Element Plus components */
+
+/* Override default button styles */
+.el-button {
+  background-color: #409EFF;
+  border-color: #409EFF;
+  color: #fff;
+
+  &:hover {
+    background-color: #66b1ff;
+    border-color: #66b1ff;
+  }
+
+  &:active {
+    background-color: #3a8ee6;
+    border-color: #3a8ee6;
+  }
+}
+
+/* Customize input field styles */
+.el-input {
+  border-color: #dcdfe6;
+
+  &:focus {
+    border-color: #409EFF;
+  }
+}
+
+/* Modify table header styles */
+.el-table th {
+  background-color: #f5f7fa;
+  color: #606266;
+}
+
+/* Change default color for links */
+.el-link {
+  color: #409EFF;
+
+  &:hover {
+    color: #66b1ff;
+  }
+}
+
+/* Adjust modal dialog styles */
+.el-dialog {
+  .el-dialog__header {
+    background-color: #f5f7fa;
+    border-bottom: 1px solid #ebeef5;
+  }
+
+  .el-dialog__body {
+    padding: 20px;
+  }
+}
