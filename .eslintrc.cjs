@@ -1,3 +1,4 @@
+// eslint相关配置
 module.exports = {
   root: true,
   env: { browser: true, es2021: true },
