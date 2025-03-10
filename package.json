@@ -12,8 +12,8 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "@eslint/js": "^9.21.0",
-    "eslint": "8.49",
+    "axios": "^1.8.2",
+    "date-fns": "^4.1.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "@typescript-eslint/parser": "^8.25.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
+    "eslint": "8.49.0",
     "eslint-config-prettier": "^10.0.2",
     "eslint-define-config": "^2.1.0",
     "eslint-plugin-n": "^17.16.2",
