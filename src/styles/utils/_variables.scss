@@ -1,4 +1,5 @@
 
+@use 'sass:math';
 // 在 SCSS 中，以 _ 开头的文件被称为“部分文件”（partials）。这些文件不会被编译成独立的 CSS 文件，而是用于被其他 SCSS 文件导入。使用部分文件可以帮助你将样式代码模块化和组织得更好
 // 颜色变量
 $primary-color: #42b983;
@@ -8,5 +9,5 @@ $text-color: #333;
 
 // 间距变量
 $spacing-unit: 16px;
-$spacing-small: $spacing-unit / 2;
+$spacing-small: math.div($spacing-unit, 2);
 $spacing-large: $spacing-unit * 2;

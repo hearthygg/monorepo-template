@@ -1,36 +1,28 @@
 <template>
-  <div class="layout">
-    <Header />
-    <div class="main">
-      <Sidebar />
-      <div class="content">
-        <router-view />
-      </div>
+  <div class="min-h-screen flex bg-background">
+    <!-- 侧边菜单栏 -->
+    <div class="w-[224px] border-r border-gray-300 px-2">
+      <MyMenu></MyMenu>
     </div>
-    <Footer />
+
+    <!-- 内容 -->
+    <div class="flex-1">
+      <!-- 头部栏 -->
+      <!-- <header class="w-full h-[60px] border-gray-100 border-b">111</header> -->
+
+      <!-- 子路由 -->
+      <main class="w-full main-container">
+        <router-view />
+      </main>
+
+      <!-- 底部栏 -->
+      <footer class="w-full h-[40px]"></footer>
+    </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import Header from './Header.vue';
-import Sidebar from './Sidebar.vue';
-import Footer from './Footer.vue';
-</script>
-
-<style scoped>
-.layout {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.main {
-  display: flex;
-  flex: 1;
-}
-
-.content {
-  flex: 1;
-  padding: 20px;
+<style lang="scss" scoped>
+.main-container {
+  height: calc(100vh - 60px - 40px);
+  overflow-y: auto;
 }
 </style>

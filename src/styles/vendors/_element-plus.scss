@@ -1,54 +1,117 @@
-/* Custom styles for Element Plus components */
+// 导入 Element Plus 的样式
+@use 'element-plus/theme-chalk/src/index.scss' as *;
 
-/* Override default button styles */
-.el-button {
-  background-color: #409EFF;
-  border-color: #409EFF;
-  color: #fff;
+// 定义主题颜色变量
+// :root {
+//   // 主色 - 天空蓝
+//   --el-color-primary: #0EA5E9;
+//   --el-color-primary-light-3: #7DD3FC;
+//   --el-color-primary-light-5: #BAE6FD;
+//   --el-color-primary-light-7: #E0F2FE;
+//   --el-color-primary-light-9: #F0F9FF;
+//   --el-color-primary-dark-2: #0284C7;
 
-  &:hover {
-    background-color: #66b1ff;
-    border-color: #66b1ff;
+//   // 成功色 - 翡翠绿
+//   --el-color-success: #10B981;
+//   --el-color-success-light-3: #34D399;
+//   --el-color-success-light-5: #6EE7B7;
+//   --el-color-success-light-7: #A7F3D0;
+//   --el-color-success-light-9: #ECFDF5;
+//   --el-color-success-dark-2: #059669;
+
+//   // 警告色 - 琥珀色
+//   --el-color-warning: #F59E0B;
+//   --el-color-warning-light-3: #FBBF24;
+//   --el-color-warning-light-5: #FCD34D;
+//   --el-color-warning-light-7: #FDE68A;
+//   --el-color-warning-light-9: #FFFBEB;
+//   --el-color-warning-dark-2: #D97706;
+
+//   // 危险色 - 红色
+//   --el-color-danger: #EF4444;
+//   --el-color-danger-light-3: #F87171;
+//   --el-color-danger-light-5: #FCA5A5;
+//   --el-color-danger-light-7: #FECACA;
+//   --el-color-danger-light-9: #FEF2F2;
+//   --el-color-danger-dark-2: #DC2626;
+
+//   // 信息色 - 靛蓝色
+//   --el-color-info: #6366F1;
+//   --el-color-info-light-3: #818CF8;
+//   --el-color-info-light-5: #A5B4FC;
+//   --el-color-info-light-7: #C7D2FE;
+//   --el-color-info-light-9: #EEF2FF;
+//   --el-color-info-dark-2: #4F46E5;
+
+//   // 文本颜色
+//   --el-text-color-primary: #1F2937;
+//   --el-text-color-regular: #374151;
+//   --el-text-color-secondary: #6B7280;
+//   --el-text-color-placeholder: #9CA3AF;
+//   --el-text-color-disabled: #D1D5DB;
+
+//   // 边框颜色
+//   --el-border-color: #E5E7EB;
+//   --el-border-color-light: #F3F4F6;
+//   --el-border-color-lighter: #F9FAFB;
+//   --el-border-color-extra-light: #FFFFFF;
+//   --el-border-color-dark: #D1D5DB;
+//   --el-border-color-darker: #9CA3AF;
+
+//   // 背景颜色
+//   --el-bg-color: #FFFFFF;
+//   --el-bg-color-page: #F9FAFB;
+//   --el-bg-color-overlay: #FFFFFF;
+
+//   // 字体设置
+//   --el-font-size-extra-large: 1.5rem;
+//   --el-font-size-large: 1.25rem;
+//   --el-font-size-medium: 1rem;
+//   --el-font-size-base: 0.875rem;
+//   --el-font-size-small: 0.75rem;
+//   --el-font-size-extra-small: 0.75rem;
+
+//   // 圆角设置
+//   --el-border-radius-base: 0.375rem;
+//   --el-border-radius-small: 0.25rem;
+//   --el-border-radius-round: 1.25rem;
+//   --el-border-radius-circle: 100%;
+// }
+
+// 调整菜单样式
+.my-custom-menu {
+  // --el-menu-active-color: var(--el-color-primary);
+  // --el-menu-text-color: var(--el-text-color-primary);
+  // --el-menu-hover-text-color: var(--el-color-primary);
+  // --el-menu-bg-color: var(--el-fill-color-blank);
+  // --el-menu-item-font-size: var(--el-font-size-base);
+  // --el-menu-item-hover-fill: var(--el-color-primary-light-9);
+
+  --el-menu-active-color: var(--el-color-primary);
+  --el-menu-text-color: var(--el-text-color-primary);
+  --el-menu-hover-text-color: var(--el-color-primary);
+  --el-menu-bg-color: var(--el-fill-color-blank);
+  --el-menu-item-font-size: var(--el-font-size-base);
+  --el-menu-item-hover-fill: var(--el-color-primary-light-9);
+
+  --el-menu-item-height: 42px;
+  --el-menu-sub-item-height: 42px;
+  --el-menu-base-level-padding: 10px;
+  --el-menu-level-padding: 10px;
+  // --el-menu-icon-width: 24px;
+  .el-menu {
+    border-right: none;
   }
-
-  &:active {
-    background-color: #3a8ee6;
-    border-color: #3a8ee6;
+  .el-menu-item.is-active {
+    background-color: var(--el-color-primary-light-9);
+    border-radius: 10px;
   }
-}
-
-/* Customize input field styles */
-.el-input {
-  border-color: #dcdfe6;
-
-  &:focus {
-    border-color: #409EFF;
+  .el-menu-item:hover {
+    background-color: var(--el-color-primary-light-9);
+    border-radius: 10px;
   }
-}
-
-/* Modify table header styles */
-.el-table th {
-  background-color: #f5f7fa;
-  color: #606266;
-}
-
-/* Change default color for links */
-.el-link {
-  color: #409EFF;
-
-  &:hover {
-    color: #66b1ff;
-  }
-}
-
-/* Adjust modal dialog styles */
-.el-dialog {
-  .el-dialog__header {
-    background-color: #f5f7fa;
-    border-bottom: 1px solid #ebeef5;
-  }
-
-  .el-dialog__body {
-    padding: 20px;
+  .el-sub-menu,
+  .el-menu-item {
+    margin: 4px 0;
   }
 }

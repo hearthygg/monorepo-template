@@ -1,3 +1,7 @@
 // 导入工具类样式
-@import 'utils/variables';
-@import 'utils/mixins';
+@use 'utils/variables';
+@use 'utils/mixins';
+@use 'base/base';
+// 引入自定义element-plus主题
+@use 'vendors/element-plus';
+
