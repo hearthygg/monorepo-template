@@ -32,8 +32,8 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true }
   },
   {
-    path: '/studentScore',
-    component: () => import('@/pages/test/StudentScore.vue'),
+    path: '/auth',
+    component: () => import('@/pages/auth/index.vue'),
     meta: { hidden: true }
   },
   {
