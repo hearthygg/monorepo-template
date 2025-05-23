@@ -72,14 +72,14 @@ const handleRegister = () => {
   <div class="flex min-h-screen">
     <!-- 左侧插画与品牌 -->
     <div class="flex-1 bg-blue-50 flex flex-col items-center justify-center p-10">
-      <div class="flex items-center mb-8">
-        <!-- <img src="/logo.png" alt="ShareFile Logo" class="w-10 h-10 mr-3" /> -->
+      <div class="absolute top-4 left-4 flex items-center">
+        <img src="@/assets/images/logo.png" alt="ShareFile Logo" class="w-10 h-10 mr-3" />
         <span class="text-2xl font-bold text-blue-700">ShareFile</span>
       </div>
       <div class="mb-8">
-        <img src="@/assets/images/login-illustration.png" alt="illustration" class="max-w-md w-full" />
+        <img src="@/assets/images/login-illustration.png" alt="illustration" class="max-w-md w-full animate-float" />
       </div>
-      <div class="mt-10 text-gray-400 text-sm">© 2025 ShareFile. 高效协作的云端文件管理平台</div>
+      <div class="absolute bottom-4 left-4 text-gray-400 text-sm">© 2025 ShareFile. 高效协作的云端文件管理平台</div>
     </div>
     <!-- 右侧表单卡片 -->
     <div class="flex-1 flex items-center justify-center bg-white">
@@ -161,5 +161,22 @@ const handleRegister = () => {
 }
 .animate-fade-in {
   animation: fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+  animation-delay: 0.5s;
 }
 </style>

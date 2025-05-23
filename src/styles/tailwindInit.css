@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  /* 主色 */
+  --color-primary-500: #0070F3;
+  --color-primary-600: #0058CC;
+
+  /* 背景和卡片色 */
+  --color-main-bg: #F5F8FF;
+ 
+  /* 文字色 */
+  --color-font-1: #111111;
+  --color-font-2: #666666;
+  --color-font-3: #888888;
+
+  /* 边框色 */
+  --color-border-1: #EAEAEA;
+  
+}

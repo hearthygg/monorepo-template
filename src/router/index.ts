@@ -1,8 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
-
-export const Layout = () => import('@/layouts/DefaultLayout.vue');
-
+import Layout from '@/components/layout/MainLayout.vue';
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   // {
@@ -16,21 +14,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   //     }
   //   ]
   // },
-  {
-    path: '/test',
-    component: () => import('@/pages/test/index.vue'),
-    meta: { hidden: true }
-  },
-  {
-    path: '/design',
-    component: () => import('@/pages/design/index.vue'),
-    meta: { hidden: true }
-  },
-  {
-    path: '/eleDesign',
-    component: () => import('@/pages/eleDesign/show.vue'),
-    meta: { hidden: true }
-  },
   {
     path: '/auth',
     component: () => import('@/pages/auth/index.vue'),
