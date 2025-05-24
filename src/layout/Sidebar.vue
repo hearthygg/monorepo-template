@@ -15,12 +15,12 @@ const menuItems = [
     text: '首页'
   },
   {
-    path: '/team',
+    path: '/my-groups',
     icon: 'mdi:account-group-outline',
     text: '我的团队'
   },
   {
-    path: '/files',
+    path: '/all-files',
     icon: 'mdi:folder-outline',
     text: '所有文件'
   },

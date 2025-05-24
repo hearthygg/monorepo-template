@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
-import Layout from '@/components/layout/MainLayout.vue';
+import Layout from '@/layout/MainLayout.vue';
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   // {
@@ -30,8 +30,25 @@ export const constantRoutes: RouteRecordRaw[] = [
         component: () => import('@/pages/dashboard/index.vue'),
         name: 'Dashboard',
         meta: { title: '首页', icon: 'homepage', affix: true }
+      },
+      {
+        path: 'my-groups',
+        component: () => import('@/pages/MyGroups/index.vue'),
+        name: 'MyGroups',
+        meta: { title: '我的团队', icon: 'homepage', affix: true }
+      },
+      {
+        path: 'all-files',
+        component: () => import('@/pages/AllFiles/index.vue'),
+        name: 'AllFiles',
+        meta: { title: '所有文件', icon: 'homepage', affix: true }
       }
     ]
+  },
+  {
+    path: '/group-details/:id',
+    component: () => import('@/pages/GroupDetails/index.vue'),
+    meta: { hidden: true }
   }
 ];
 
