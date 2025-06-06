@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { ElMessage } from 'element-plus';
 
 // 创建一个 Axios 实例
 const httpClient = axios.create({
-  baseURL: 'https://api.example.com', // 替换为你的 API 基础 URL
+  baseURL: import.meta.env.VITE_GLOB_API_URL, // 替换为你的 API 基础 URL
   timeout: 10000 // 请求超时时间
 });
 
@@ -11,7 +12,7 @@ httpClient.interceptors.request.use(
   config => {
     // 在发送请求之前做些什么
     // 比如添加 token 到 headers
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(import.meta.env.VITE_ACCESS_TOKEN);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,8 +27,13 @@ httpClient.interceptors.request.use(
 // 响应拦截器
 httpClient.interceptors.response.use(
   response => {
-    // 对响应数据做些什么
-    return response;
+    const data = response.data;
+    if (data.code === 200) {
+      return data;
+    } else {
+      ElMessage.error(data.message || '请求失败');
+      return Promise.reject(data.message);
+    }
   },
   error => {
     // 对响应错误做些什么

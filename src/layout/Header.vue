@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import { useUserStore } from '@/stores/user';
 import { Icon } from '@iconify/vue';
 import { useRouter } from 'vue-router';
-
+import { ElMessageBox } from 'element-plus';
 const router = useRouter();
-
+const userStore = useUserStore();
 const handleCommand = (command: string) => {
   switch (command) {
     case 'settings':
       router.push('/settings');
       break;
     case 'logout':
-      // TODO: 实现退出登录逻辑
-      router.push('/auth');
+      ElMessageBox.confirm('确定退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        await userStore.logout();
+        router.push({ path: '/auth', query: { redirect: router.currentRoute.value.fullPath } });
+      });
       break;
   }
 };

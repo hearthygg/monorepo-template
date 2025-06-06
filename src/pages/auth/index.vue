@@ -1,35 +1,43 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useUserStore } from '@/stores/user';
+import { useRoute, useRouter } from 'vue-router';
 
 const activeTab = ref<'login' | 'register'>('login');
-
+const userStore = useUserStore();
+const router = useRouter();
+const route = useRoute();
 // 登录表单数据和校验
 const loginForm = reactive({
-  email: '',
+  // email: '',
+  username: '',
   password: '',
   remember: false
 });
 const loginRules = {
-  email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email' as const, message: '邮箱格式不正确', trigger: ['blur', 'change'] }
-  ],
+  // email: [
+  //   { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+  //   { type: 'email' as const, message: '邮箱格式不正确', trigger: ['blur', 'change'] }
+  // ],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 };
 const loginFormRef = ref();
 
 // 注册表单数据和校验
 const registerForm = reactive({
-  email: '',
+  // email: '',
+  username: '',
   password: '',
   confirmPassword: ''
 });
 const registerRules = {
-  email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email' as const, message: '邮箱格式不正确', trigger: ['blur', 'change'] }
-  ],
+  // email: [
+  //   { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+  //   { type: 'email' as const, message: '邮箱格式不正确', trigger: ['blur', 'change'] }
+  // ],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   confirmPassword: [
     { required: true, message: '请再次输入密码', trigger: 'blur' },
@@ -51,8 +59,17 @@ const registerFormRef = ref();
 const handleLogin = () => {
   loginFormRef.value.validate((valid: boolean) => {
     if (valid) {
-      // TODO: 调用登录API
-      ElMessage.success('登录成功（模拟）');
+      userStore
+        .login({
+          username: loginForm.username,
+          password: loginForm.password
+        })
+        .then(() => {
+          ElMessage.success('登录成功');
+          const redirect = route.query.redirect as string;
+          // 登录成功后跳转
+          router.push(redirect || '/');
+        });
     }
   });
 };
@@ -95,8 +112,11 @@ const handleRegister = () => {
           </div>
           <transition name="fade-slide" mode="out-in">
             <el-form v-if="activeTab === 'login'" ref="loginFormRef" key="login" :model="loginForm" :rules="loginRules" label-position="top" @submit.prevent>
-              <el-form-item label="邮箱地址" prop="email">
+              <!-- <el-form-item label="邮箱地址" prop="email">
                 <el-input v-model="loginForm.email" size="large" placeholder="请输入邮箱地址" clearable class="transition focus:ring-2 focus:ring-blue-400" />
+              </el-form-item> -->
+              <el-form-item label="用户名" prop="username">
+                <el-input v-model="loginForm.username" size="large" placeholder="请输入用户名" clearable class="transition focus:ring-2 focus:ring-blue-400" />
               </el-form-item>
               <el-form-item label="密码" prop="password">
                 <el-input v-model="loginForm.password" size="large" type="password" placeholder="请输入密码" show-password clearable class="transition focus:ring-2 focus:ring-blue-400" />
@@ -110,8 +130,11 @@ const handleRegister = () => {
               </el-form-item>
             </el-form>
             <el-form v-else ref="registerFormRef" key="register" :model="registerForm" :rules="registerRules" label-position="top" @submit.prevent>
-              <el-form-item label="邮箱地址" prop="email">
+              <!-- <el-form-item label="邮箱地址" prop="email">
                 <el-input v-model="registerForm.email" size="large" placeholder="请输入邮箱地址" clearable class="transition focus:ring-2 focus:ring-blue-400" />
+              </el-form-item> -->
+              <el-form-item label="用户名" prop="username">
+                <el-input v-model="registerForm.username" size="large" placeholder="请输入用户名" clearable class="transition focus:ring-2 focus:ring-blue-400" />
               </el-form-item>
               <el-form-item label="密码" prop="password">
                 <el-input v-model="registerForm.password" size="large" type="password" placeholder="请输入密码" show-password clearable class="transition focus:ring-2 focus:ring-blue-400" />
