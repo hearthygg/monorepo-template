@@ -11,9 +11,9 @@ export const loginApi = (data: LoginDto): AxiosPromise<{ access_token: string }>
 };
 
 // 注册
-export const registerApi = (data: RegisterDto) => {
+export const registerApi = (data: RegisterDto): AxiosPromise<string> => {
   return http({
-    url: '/auth/login',
+    url: '/auth/register',
     method: 'post',
     data
   });

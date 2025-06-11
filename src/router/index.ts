@@ -4,7 +4,7 @@ import Layout from '@/layout/MainLayout.vue';
 import { useUserStore } from '@/stores/user';
 
 // 白名单路由
-const whiteList = ['/auth'];
+const whiteList = ['/auth', '/invite/operate'];
 
 // 检查用户是否已登录
 const isAuthenticated = (): boolean => {
@@ -49,6 +49,13 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: '/group-details/:id',
     component: () => import('@/pages/GroupDetails/index.vue'),
     meta: { hidden: true }
+  },
+  // 邀请操作
+  {
+    path: '/invite/operate',
+    name: 'InviteOperate',
+    component: () => import('@/pages/invite/Operate.vue'),
+    meta: { hidden: true, public: true } // 可选，表示无需登录即可访问
   },
   // 404 页面路由
   {

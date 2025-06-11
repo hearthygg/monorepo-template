@@ -13,6 +13,7 @@
     </div>
 
     <div v-if="node.type === 'folder' && isExpanded && node.children">
+      <!-- 一个单文件组件可以通过它的文件名被其自己所引用。例如：名为 FooBar.vue 的组件可以在其模板中用 <FooBar/> 引用它自己 -->
       <TreeNode v-for="child in node.children" :key="child.id" :node="child" :level="level + 1" :expanded-folders="expandedFolders" :selected-folder="selectedFolder" @toggle="$emit('toggle', $event)" @select="$emit('select', $event)" />
     </div>
   </div>

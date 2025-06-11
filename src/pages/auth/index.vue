@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useUserStore } from '@/stores/user';
 import { useRoute, useRouter } from 'vue-router';
+import { registerApi } from '@/services';
 
 const activeTab = ref<'login' | 'register'>('login');
 const userStore = useUserStore();
@@ -27,16 +28,17 @@ const loginFormRef = ref();
 
 // 注册表单数据和校验
 const registerForm = reactive({
-  // email: '',
+  email: '',
+  nickname: '',
   username: '',
   password: '',
   confirmPassword: ''
 });
 const registerRules = {
-  // email: [
-  //   { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-  //   { type: 'email' as const, message: '邮箱格式不正确', trigger: ['blur', 'change'] }
-  // ],
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email' as const, message: '邮箱格式不正确', trigger: ['blur', 'change'] }
+  ],
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   confirmPassword: [
@@ -78,8 +80,17 @@ const handleLogin = () => {
 const handleRegister = () => {
   registerFormRef.value.validate((valid: boolean) => {
     if (valid) {
-      // TODO: 调用注册API
-      ElMessage.success('注册成功（模拟）');
+      registerApi({
+        email: registerForm.email,
+        nickname: registerForm.nickname,
+        username: registerForm.username,
+        password: registerForm.password
+      }).then(({ data }) => {
+        ElMessage.success('注册成功');
+        activeTab.value = 'login';
+        loginForm.username = data;
+        handleLogin();
+      });
     }
   });
 };
@@ -130,9 +141,12 @@ const handleRegister = () => {
               </el-form-item>
             </el-form>
             <el-form v-else ref="registerFormRef" key="register" :model="registerForm" :rules="registerRules" label-position="top" @submit.prevent>
-              <!-- <el-form-item label="邮箱地址" prop="email">
+              <el-form-item label="邮箱地址" prop="email">
                 <el-input v-model="registerForm.email" size="large" placeholder="请输入邮箱地址" clearable class="transition focus:ring-2 focus:ring-blue-400" />
-              </el-form-item> -->
+              </el-form-item>
+              <el-form-item label="昵称">
+                <el-input v-model="registerForm.nickname" size="large" placeholder="请输入昵称" clearable class="transition focus:ring-2 focus:ring-blue-400" />
+              </el-form-item>
               <el-form-item label="用户名" prop="username">
                 <el-input v-model="registerForm.username" size="large" placeholder="请输入用户名" clearable class="transition focus:ring-2 focus:ring-blue-400" />
               </el-form-item>

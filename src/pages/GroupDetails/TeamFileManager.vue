@@ -2,9 +2,9 @@
   <div class="flex h-full bg-white">
     <!-- 左侧文件树 -->
     <div class="w-64 border-r border-gray-200 flex flex-col">
-      <div class="p-3 border-b border-gray-200">
+      <!-- <div class="p-3 border-b border-gray-200">
         <h3 class="text-sm font-medium text-gray-900">文件夹</h3>
-      </div>
+      </div> -->
       <div class="flex-1 overflow-y-auto p-2">
         <div v-for="node in fileTree" :key="node.id">
           <TreeNode :node="node" :level="0" :expanded-folders="expandedFolders" :selected-folder="selectedFolder" @toggle="toggleFolder" @select="selectFolder" />
@@ -15,10 +15,7 @@
     <!-- 右侧文件列表 -->
     <div class="flex-1 flex flex-col">
       <!-- 工具栏 -->
-      <div class="p-4 border-b border-gray-200 space-y-3">
-        <!-- 面包屑导航 -->
-        <BreadcrumbNav :items="breadcrumbItems" @navigate="selectFolder" />
-
+      <div class="p-3 border-b border-gray-200 space-y-3">
         <!-- 操作栏 -->
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
@@ -50,7 +47,7 @@
               </button>
             </div>
 
-            <button class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center">
+            <button class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center" @click="isCreateFolderModalOpen = true">
               <FolderPlus class="h-4 w-4 mr-2" />
               新建文件夹
             </button>
@@ -65,6 +62,8 @@
 
       <!-- 文件列表内容 -->
       <div class="flex-1 overflow-y-auto p-4">
+        <!-- 面包屑导航 -->
+        <BreadcrumbNav :items="breadcrumbItems" @navigate="selectFolder" />
         <div v-if="currentContent.length === 0" class="text-center py-12">
           <Folder class="h-12 w-12 mx-auto mb-4 text-gray-400" />
           <h3 class="text-lg font-medium text-gray-900 mb-2">文件夹为空</h3>
@@ -95,17 +94,24 @@
 
     <!-- 文件上传模态框 -->
     <FileUploadModal v-if="isUploadModalOpen" @close="isUploadModalOpen = false" @upload="handleFileUpload" />
+
+    <!-- 新建文件夹模态框 -->
+    <CreateFolderModal v-model="isCreateFolderModalOpen" :team-id="parseInt(props.teamId)" @create="handleCreateFolder" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Search, Download, Trash2, List, Grid, FolderPlus, Upload, Folder } from 'lucide-vue-next';
 import TreeNode from './TreeNode.vue';
 import BreadcrumbNav from './BreadcrumbNav.vue';
 import FileListItem from './FileListItem.vue';
 import FileGridItem from './FileGridItem.vue';
 import FileUploadModal from './FileUploadModal.vue';
+import CreateFolderModal from '@/components/business/CreateFolderModal.vue';
+import { createFolderApi, getFileTreeApi } from '@/services/api/file';
+import type { CreateFolderDto } from '@/services/api/file/types';
+import { ElMessage } from 'element-plus';
 
 // 类型定义
 type FileType = 'folder' | 'file';
@@ -149,6 +155,7 @@ const selectedFiles = ref<Set<string>>(new Set());
 const isUploadModalOpen = ref(false);
 const expandedFolders = ref<Set<string>>(new Set(['root', 'design']));
 const selectedFolder = ref('root');
+const isCreateFolderModalOpen = ref(false);
 
 // 模拟文件树数据
 const fileTree = ref<FileNode[]>([
@@ -286,7 +293,7 @@ const fileTree = ref<FileNode[]>([
   }
 ]);
 
-// 计算属性
+// 计算属性 当前文件夹下的文件列表
 const currentContent = computed((): FileNode[] => {
   const findNode = (nodes: FileNode[], id: string): FileNode | null => {
     for (const node of nodes) {
@@ -303,6 +310,7 @@ const currentContent = computed((): FileNode[] => {
   return currentFolder?.children || [];
 });
 
+// 计算属性 面包屑导航文件路径
 const breadcrumbItems = computed((): BreadcrumbItem[] => {
   const findPath = (nodes: FileNode[], targetId: string, path: FileNode[] = []): FileNode[] | null => {
     for (const node of nodes) {
@@ -367,4 +375,18 @@ const handleFileUpload = async (files: File[]): Promise<void> => {
   console.log('Uploading files:', files);
   isUploadModalOpen.value = false;
 };
+
+const handleCreateFolder = async (data: CreateFolderDto) => {
+  console.log('createFolder', data);
+  const res = await createFolderApi(data);
+  console.log(res);
+  ElMessage.success('创建成功');
+  isCreateFolderModalOpen.value = false;
+};
+
+onMounted(() => {
+  getFileTreeApi(parseInt(props.teamId)).then(res => {
+    console.log(res);
+  });
+});
 </script>

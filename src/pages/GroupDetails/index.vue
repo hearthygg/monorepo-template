@@ -249,18 +249,20 @@
     </div>
 
     <!-- 邀请成员模态框 -->
-    <InviteMemberModal v-if="isInviteModalOpen" :team-name="team.name" @close="isInviteModalOpen = false" @invite="handleInviteMember" />
+    <InviteMemberModal v-model="isInviteModalOpen" width="700px" :team-id="currentTeamId" @success="handleInviteMember" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { ArrowLeft, BarChart3, FolderOpen, UserPlus, MoreVertical, Edit3, Settings, Share2, Users, Files, Activity, Star, Upload, FileText, MessageSquare, MoreHorizontal, Crown, Shield, User } from 'lucide-vue-next';
 import type { LucideIcon } from 'lucide-vue-next';
 import TeamFileManager from './TeamFileManager.vue';
-import InviteMemberModal from './InviteMemberModal.vue';
+import InviteMemberModal from '@/components/business/InviteMemberModal.vue';
 
+const route = useRoute();
+const currentTeamId = computed(() => parseInt(route.params.id as string));
 // 类型定义
 type ViewMode = 'dashboard' | 'files';
 type TabType = 'overview' | 'members' | 'activity';
@@ -502,7 +504,7 @@ const tabs = [
 // 方法
 const handleInviteMember = (data: InviteData): void => {
   console.log('Inviting members:', data);
-  isInviteModalOpen.value = false;
+  // isInviteModalOpen.value = false;
 };
 
 const getStatBgClass = (color: StatColor): string => {
