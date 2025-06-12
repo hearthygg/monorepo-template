@@ -63,13 +63,13 @@
       <!-- 文件列表内容 -->
       <div class="flex-1 overflow-y-auto p-4">
         <!-- 面包屑导航 -->
-        <BreadcrumbNav :items="breadcrumbItems" @navigate="selectFolder" />
+        <BreadcrumbNav :is-trigger="true" :items="breadcrumbItems" @navigate="selectFolder" />
         <div v-if="currentContent.length === 0" class="text-center py-12">
           <Folder class="h-12 w-12 mx-auto mb-4 text-gray-400" />
           <h3 class="text-lg font-medium text-gray-900 mb-2">文件夹为空</h3>
           <p class="text-gray-500 mb-4">开始上传文件或创建新文件夹</p>
           <div class="flex justify-center space-x-2">
-            <button class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center">
+            <button class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center" @click="isCreateFolderModalOpen = true">
               <FolderPlus class="h-4 w-4 mr-2" />
               新建文件夹
             </button>
@@ -93,10 +93,10 @@
     </div>
 
     <!-- 文件上传模态框 -->
-    <FileUploadModal v-if="isUploadModalOpen" @close="isUploadModalOpen = false" @upload="handleFileUpload" />
+    <FileUploadModal v-if="isUploadModalOpen" :team-id="parseInt(props.teamId)" :folder-id="selectedFolder" :items="breadcrumbItems" @close="isUploadModalOpen = false" @success="handleFileUploadSuccess" />
 
     <!-- 新建文件夹模态框 -->
-    <CreateFolderModal v-model="isCreateFolderModalOpen" :team-id="parseInt(props.teamId)" @create="handleCreateFolder" />
+    <CreateFolderModal v-model="isCreateFolderModalOpen" :items="breadcrumbItems" :team-id="parseInt(props.teamId)" @create="handleCreateFolder" />
   </div>
 </template>
 
@@ -108,36 +108,17 @@ import BreadcrumbNav from './BreadcrumbNav.vue';
 import FileListItem from './FileListItem.vue';
 import FileGridItem from './FileGridItem.vue';
 import FileUploadModal from './FileUploadModal.vue';
-import CreateFolderModal from '@/components/business/CreateFolderModal.vue';
+import CreateFolderModal from './CreateFolderModal.vue';
 import { createFolderApi, getFileTreeApi } from '@/services/api/file';
-import type { CreateFolderDto } from '@/services/api/file/types';
+import type { CreateFolderDto, FileTreeDto } from '@/services/api/file/types';
 import { ElMessage } from 'element-plus';
 
 // 类型定义
-type FileType = 'folder' | 'file';
-type FileCategory = 'doc' | 'image' | 'other';
 type ViewMode = 'list' | 'grid';
 type BreadcrumbType = 'home' | 'folder';
 
-interface User {
-  name: string;
-}
-
-interface FileNode {
-  id: string;
-  name: string;
-  type: FileType;
-  fileType?: FileCategory;
-  parentId?: string;
-  size?: number;
-  updatedAt: Date;
-  updatedBy: User;
-  isStarred?: boolean;
-  children?: FileNode[];
-}
-
 interface BreadcrumbItem {
-  id: string;
+  id: number;
   name: string;
   type: BreadcrumbType;
 }
@@ -151,151 +132,31 @@ const props = defineProps<{
 // 响应式数据
 const viewMode = ref<ViewMode>('list');
 const searchQuery = ref('');
-const selectedFiles = ref<Set<string>>(new Set());
+const selectedFiles = ref<Set<number>>(new Set());
 const isUploadModalOpen = ref(false);
-const expandedFolders = ref<Set<string>>(new Set(['root', 'design']));
-const selectedFolder = ref('root');
+const expandedFolders = ref<Set<number>>(new Set([0]));
+const selectedFolder = ref(0);
 const isCreateFolderModalOpen = ref(false);
 
-// 模拟文件树数据
-const fileTree = ref<FileNode[]>([
+const fileTree = ref<FileTreeDto[]>([
   {
-    id: 'root',
+    id: 0,
     name: '团队文件',
-    type: 'folder',
-    updatedAt: new Date(),
-    updatedBy: { name: '系统' },
-    children: [
-      {
-        id: 'design',
-        name: '设计文件',
-        type: 'folder',
-        parentId: 'root',
-        updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        updatedBy: { name: '李明' },
-        children: [
-          {
-            id: 'ui-kit',
-            name: 'UI组件库',
-            type: 'folder',
-            parentId: 'design',
-            updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            updatedBy: { name: '王芳' },
-            children: [
-              {
-                id: 'buttons.fig',
-                name: '按钮组件.fig',
-                type: 'file',
-                fileType: 'other',
-                parentId: 'ui-kit',
-                size: 1024000,
-                updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
-                updatedBy: { name: '李明' },
-                isStarred: true
-              },
-              {
-                id: 'forms.fig',
-                name: '表单组件.fig',
-                type: 'file',
-                fileType: 'other',
-                parentId: 'ui-kit',
-                size: 2048000,
-                updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-                updatedBy: { name: '王芳' }
-              }
-            ]
-          },
-          {
-            id: 'mockups',
-            name: '原型设计',
-            type: 'folder',
-            parentId: 'design',
-            updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-            updatedBy: { name: '张伟' },
-            children: [
-              {
-                id: 'homepage.fig',
-                name: '首页原型.fig',
-                type: 'file',
-                fileType: 'other',
-                parentId: 'mockups',
-                size: 5120000,
-                updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-                updatedBy: { name: '张伟' },
-                isStarred: true
-              }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'documents',
-        name: '文档资料',
-        type: 'folder',
-        parentId: 'root',
-        updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-        updatedBy: { name: '刘强' },
-        children: [
-          {
-            id: 'requirements.docx',
-            name: '需求文档.docx',
-            type: 'file',
-            fileType: 'doc',
-            parentId: 'documents',
-            size: 1536000,
-            updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-            updatedBy: { name: '刘强' }
-          },
-          {
-            id: 'user-research.pdf',
-            name: '用户研究报告.pdf',
-            type: 'file',
-            fileType: 'other',
-            parentId: 'documents',
-            size: 3072000,
-            updatedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
-            updatedBy: { name: '王芳' },
-            isStarred: true
-          }
-        ]
-      },
-      {
-        id: 'assets',
-        name: '素材资源',
-        type: 'folder',
-        parentId: 'root',
-        updatedAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
-        updatedBy: { name: '李明' },
-        children: [
-          {
-            id: 'logo.png',
-            name: '品牌Logo.png',
-            type: 'file',
-            fileType: 'image',
-            parentId: 'assets',
-            size: 512000,
-            updatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-            updatedBy: { name: '李明' }
-          },
-          {
-            id: 'icons.zip',
-            name: '图标包.zip',
-            type: 'file',
-            fileType: 'other',
-            parentId: 'assets',
-            size: 2560000,
-            updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
-            updatedBy: { name: '张伟' }
-          }
-        ]
-      }
-    ]
+    isFolder: true,
+    isOwner: true,
+    owner: {
+      id: 0,
+      nickname: '系统'
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    children: []
   }
 ]);
 
 // 计算属性 当前文件夹下的文件列表
-const currentContent = computed((): FileNode[] => {
-  const findNode = (nodes: FileNode[], id: string): FileNode | null => {
+const currentContent = computed((): FileTreeDto[] => {
+  const findNode = (nodes: FileTreeDto[], id: number): FileTreeDto | null => {
     for (const node of nodes) {
       if (node.id === id) return node;
       if (node.children) {
@@ -312,7 +173,7 @@ const currentContent = computed((): FileNode[] => {
 
 // 计算属性 面包屑导航文件路径
 const breadcrumbItems = computed((): BreadcrumbItem[] => {
-  const findPath = (nodes: FileNode[], targetId: string, path: FileNode[] = []): FileNode[] | null => {
+  const findPath = (nodes: FileTreeDto[], targetId: number, path: FileTreeDto[] = []): FileTreeDto[] | null => {
     for (const node of nodes) {
       const newPath = [...path, node];
       if (node.id === targetId) return newPath;
@@ -329,15 +190,15 @@ const breadcrumbItems = computed((): BreadcrumbItem[] => {
     return path.map(node => ({
       id: node.id,
       name: node.name === '团队文件' ? props.teamName : node.name,
-      type: node.id === 'root' ? 'home' : 'folder'
+      type: node.id === 0 ? 'home' : 'folder'
     }));
   }
 
-  return [{ id: 'root', name: props.teamName, type: 'home' }];
+  return [{ id: 0, name: props.teamName, type: 'home' }];
 });
 
 // 方法
-const toggleFolder = (folderId: string): void => {
+const toggleFolder = (folderId: number): void => {
   const newExpanded = new Set(expandedFolders.value);
   if (newExpanded.has(folderId)) {
     newExpanded.delete(folderId);
@@ -347,12 +208,12 @@ const toggleFolder = (folderId: string): void => {
   expandedFolders.value = newExpanded;
 };
 
-const selectFolder = (folderId: string): void => {
+const selectFolder = (folderId: number): void => {
   selectedFolder.value = folderId;
   selectedFiles.value = new Set();
 };
 
-const handleFileSelect = (fileId: string, selected: boolean): void => {
+const handleFileSelect = (fileId: number, selected: boolean): void => {
   const newSelected = new Set(selectedFiles.value);
   if (selected) {
     newSelected.add(fileId);
@@ -362,8 +223,8 @@ const handleFileSelect = (fileId: string, selected: boolean): void => {
   selectedFiles.value = newSelected;
 };
 
-const handleFileClick = (item: FileNode): void => {
-  if (item.type === 'folder') {
+const handleFileClick = (item: FileTreeDto): void => {
+  if (item.isFolder) {
     selectFolder(item.id);
     toggleFolder(item.id);
   } else {
@@ -371,22 +232,26 @@ const handleFileClick = (item: FileNode): void => {
   }
 };
 
-const handleFileUpload = async (files: File[]): Promise<void> => {
-  console.log('Uploading files:', files);
+const handleFileUploadSuccess = async (): Promise<void> => {
   isUploadModalOpen.value = false;
+  getFileTree();
 };
 
 const handleCreateFolder = async (data: CreateFolderDto) => {
-  console.log('createFolder', data);
-  const res = await createFolderApi(data);
-  console.log(res);
+  console.log('createFolder', selectedFolder.value);
+  data.parentId = selectedFolder.value === 0 ? undefined : selectedFolder.value;
+  await createFolderApi(data);
   ElMessage.success('创建成功');
   isCreateFolderModalOpen.value = false;
+  getFileTree();
+};
+
+const getFileTree = async () => {
+  const res = await getFileTreeApi(parseInt(props.teamId));
+  fileTree.value[0].children = res.data;
 };
 
 onMounted(() => {
-  getFileTreeApi(parseInt(props.teamId)).then(res => {
-    console.log(res);
-  });
+  getFileTree();
 });
 </script>

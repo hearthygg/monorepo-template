@@ -13,11 +13,11 @@
       </div>
 
       <!-- 收藏按钮 -->
-      <div class="absolute top-2 right-2 z-10">
+      <!-- <div class="absolute top-2 right-2 z-10">
         <button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white rounded">
           <Star :class="['h-4 w-4', file.isStarred ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400']" />
         </button>
-      </div>
+      </div> -->
 
       <div class="p-4 flex flex-col h-full" @click="$emit('click', file)">
         <!-- 文件图标 -->
@@ -32,7 +32,7 @@
           </h4>
           <div class="text-xs text-gray-500 text-center space-y-1">
             <div class="truncate">{{ teamName }}</div>
-            <div>{{ formatDate(file.updatedAt) }}</div>
+            <div>{{ file.updatedAt }}</div>
             <div v-if="file.size">{{ formatFileSize(file.size) }}</div>
           </div>
         </div>
@@ -40,7 +40,7 @@
         <!-- 底部信息 -->
         <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
           <div class="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
-            <span class="text-xs font-medium">{{ file.updatedBy.name.substring(0, 2).toUpperCase() }}</span>
+            <span class="text-xs font-medium">{{ file.owner.nickname?.substring(0, 2).toUpperCase() }}</span>
           </div>
 
           <button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-200 rounded">
@@ -53,6 +53,7 @@
 </template>
 
 <script setup lang="ts">
+import type { FileTreeDto } from '@/services/api/file/types';
 import { FileText, ImageIcon, FileSpreadsheet, FileCode, File, Folder, Star, MoreHorizontal } from 'lucide-vue-next';
 
 // 类型定义
@@ -74,21 +75,22 @@ interface FileItem {
 
 // Props 定义
 const props = defineProps<{
-  file: FileItem;
+  file: FileTreeDto;
   teamName: string;
   isSelected: boolean;
 }>();
 
 // Emits 定义
 const emit = defineEmits<{
-  (e: 'select', fileId: string, checked: boolean): void;
-  (e: 'click', file: FileItem): void;
+  (e: 'select', fileId: number, checked: boolean): void;
+  (e: 'click', file: FileTreeDto): void;
 }>();
 
 const getFileIcon = (): typeof File => {
-  switch (props.file.type) {
-    case 'folder':
-      return Folder;
+  if (props.file.isFolder) {
+    return Folder;
+  }
+  switch (props.file.ext) {
     case 'doc':
       return FileText;
     case 'image':
@@ -103,7 +105,7 @@ const getFileIcon = (): typeof File => {
 };
 
 const formatFileSize = (bytes: number): string => {
-  if (!bytes || props.file.type === 'folder') return '';
+  if (!bytes || props.file.isFolder) return '';
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;

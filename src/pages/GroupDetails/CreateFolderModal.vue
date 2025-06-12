@@ -1,5 +1,8 @@
 <template>
-  <el-dialog v-model="dialogVisible" title="创建文件夹" width="400px" :close-on-click-modal="false" @close="handleClose">
+  <el-dialog v-model="dialogVisible" title="创建文件夹" width="600px" :close-on-click-modal="false" @close="handleClose">
+    <div class="mb-2">
+      <BreadcrumbNav :is-trigger="false" :items="items" />
+    </div>
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
       <el-form-item label="文件夹名称" prop="name">
         <el-input v-model="form.name" placeholder="请输入文件夹名称" />
@@ -18,11 +21,13 @@
 import { ref, reactive, computed } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import type { CreateFolderDto } from '@/services/api/file/types';
+import BreadcrumbNav from './BreadcrumbNav.vue';
 
 const props = defineProps<{
   modelValue: boolean;
   teamId: number;
   parentId?: number;
+  items: any;
 }>();
 
 const emit = defineEmits<{

@@ -5,7 +5,7 @@
       <button
         :class="['h-8 px-2 rounded flex items-center transition-colors', index === items.length - 1 ? 'text-gray-900 font-medium cursor-default' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100']"
         :disabled="index === items.length - 1"
-        @click="$emit('navigate', item.id)"
+        @click="isTrigger ? $emit('navigate', item.id) : null"
       >
         <Home v-if="item.type === 'home'" class="h-4 w-4" />
         <Folder v-else-if="item.type === 'folder'" class="h-4 w-4 text-gray-500" />
@@ -20,10 +20,11 @@ import { ChevronRight, Home, Folder } from 'lucide-vue-next';
 
 defineProps<{
   items: {
-    id: string;
+    id: number;
     name: string;
     type: 'home' | 'folder';
   }[];
+  isTrigger: boolean;
 }>();
 
 defineEmits(['navigate']);
