@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full group">
+  <div class="h-full group" @contextmenu.prevent.stop="handleContextMenu">
     <div class="h-full cursor-pointer hover:shadow-md transition-all duration-300 bg-white rounded-lg border border-gray-200 relative">
       <!-- 选择框 -->
       <div class="absolute top-2 left-2 z-10">
@@ -84,6 +84,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'select', fileId: number, checked: boolean): void;
   (e: 'click', file: FileTreeDto): void;
+  (e: 'contextmenu', file: FileTreeDto, event: MouseEvent): void;
 }>();
 
 const getFileIcon = (): typeof File => {
@@ -116,5 +117,9 @@ const formatDate = (date: Date): string => {
     month: 'numeric',
     day: 'numeric'
   }).format(date);
+};
+
+const handleContextMenu = (e: MouseEvent): void => {
+  emit('contextmenu', props.file, e);
 };
 </script>

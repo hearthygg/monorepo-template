@@ -7,7 +7,7 @@
       </div> -->
       <div class="flex-1 overflow-y-auto p-2">
         <div v-for="node in fileTree" :key="node.id">
-          <TreeNode :node="node" :level="0" :expanded-folders="expandedFolders" :selected-folder="selectedFolder" @toggle="toggleFolder" @select="selectFolder" />
+          <TreeNode :node="node" :level="0" :expanded-folders="expandedFolders" :selected-folder="selectedFolder" @contextmenu="handleFileContextMenu" @toggle="toggleFolder" @select="selectFolder" />
         </div>
       </div>
     </div>
@@ -82,12 +82,12 @@
 
         <!-- 列表视图 -->
         <div v-else-if="viewMode === 'list'" class="space-y-1">
-          <FileListItem v-for="item in currentContent" :key="item.id" :file="item" :team-name="teamName" :is-selected="selectedFiles.has(item.id)" @select="handleFileSelect" @click="handleFileClick" />
+          <FileListItem v-for="item in currentContent" :key="item.id" :file="item" :team-name="teamName" :is-selected="selectedFiles.has(item.id)" @contextmenu="handleFileContextMenu" @select="handleFileSelect" @click="handleFileClick" />
         </div>
 
         <!-- 网格视图 -->
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          <FileGridItem v-for="item in currentContent" :key="item.id" :file="item" :team-name="teamName" :is-selected="selectedFiles.has(item.id)" @select="handleFileSelect" @click="handleFileClick" />
+          <FileGridItem v-for="item in currentContent" :key="item.id" :file="item" :team-name="teamName" :is-selected="selectedFiles.has(item.id)" @contextmenu="handleFileContextMenu" @select="handleFileSelect" @click="handleFileClick" />
         </div>
       </div>
     </div>
@@ -97,6 +97,12 @@
 
     <!-- 新建文件夹模态框 -->
     <CreateFolderModal v-model="isCreateFolderModalOpen" :items="breadcrumbItems" :team-id="parseInt(props.teamId)" @create="handleCreateFolder" />
+
+    <!-- 右键菜单 -->
+    <FileContextMenu :selected-file="contextMenu.selectedFile" :permission="contextMenu.permission" :x="contextMenu.x" :y="contextMenu.y" :visible="contextMenu.visible" @close="hideContextMenu" @action="handleContextMenuAction" />
+
+    <!-- 更新权限模态框 -->
+    <UpdatePermissionModal v-if="contextMenu.selectedFile?.id" v-model="isUpdatePermissionModalOpen" :file="contextMenu.selectedFile" @success="handleUpdatePermissionSuccess" />
   </div>
 </template>
 
@@ -112,6 +118,10 @@ import CreateFolderModal from './CreateFolderModal.vue';
 import { createFolderApi, getFileTreeApi } from '@/services/api/file';
 import type { CreateFolderDto, FileTreeDto } from '@/services/api/file/types';
 import { ElMessage } from 'element-plus';
+import { FilePermissionLevel } from '@/constants/enum';
+import FileContextMenu from '@/components/contextMenu/FileContextMenu.vue';
+import { useContextMenu } from '@/components/contextMenu/useContextMenu';
+import UpdatePermissionModal from '@/components/business/UpdatePermissionModal.vue';
 
 // 类型定义
 type ViewMode = 'list' | 'grid';
@@ -128,7 +138,7 @@ const props = defineProps<{
   teamId: string;
   teamName: string;
 }>();
-
+const { contextMenu, showContextMenu, hideContextMenu } = useContextMenu();
 // 响应式数据
 const viewMode = ref<ViewMode>('list');
 const searchQuery = ref('');
@@ -137,6 +147,7 @@ const isUploadModalOpen = ref(false);
 const expandedFolders = ref<Set<number>>(new Set([0]));
 const selectedFolder = ref(0);
 const isCreateFolderModalOpen = ref(false);
+const isUpdatePermissionModalOpen = ref(false);
 
 const fileTree = ref<FileTreeDto[]>([
   {
@@ -144,6 +155,7 @@ const fileTree = ref<FileTreeDto[]>([
     name: '团队文件',
     isFolder: true,
     isOwner: true,
+    permission: FilePermissionLevel.VIEW,
     owner: {
       id: 0,
       nickname: '系统'
@@ -232,6 +244,11 @@ const handleFileClick = (item: FileTreeDto): void => {
   }
 };
 
+const handleFileContextMenu = (item: FileTreeDto, e: MouseEvent): void => {
+  console.log('context menu', item, e.clientX, e.clientY);
+  showContextMenu(e, item, item.permission);
+};
+
 const handleFileUploadSuccess = async (): Promise<void> => {
   isUploadModalOpen.value = false;
   getFileTree();
@@ -246,9 +263,64 @@ const handleCreateFolder = async (data: CreateFolderDto) => {
   getFileTree();
 };
 
+const handleUpdatePermissionSuccess = async (): Promise<void> => {
+  isUpdatePermissionModalOpen.value = false;
+  getFileTree();
+};
+
 const getFileTree = async () => {
   const res = await getFileTreeApi(parseInt(props.teamId));
   fileTree.value[0].children = res.data;
+};
+
+// 右键菜单操作
+const handleContextMenuAction = async (action: string, file: FileTreeDto) => {
+  console.log(`执行操作: ${action}`, file);
+
+  // 这里可以根据不同的操作执行相应的逻辑
+  switch (action) {
+    case 'open':
+      console.log('打开文件/文件夹');
+      break;
+    case 'preview':
+      console.log('预览文件');
+      break;
+    case 'download':
+      console.log('下载文件');
+      break;
+    case 'share':
+      console.log('分享文件');
+      break;
+    case 'star':
+      console.log('收藏文件');
+      break;
+    case 'unstar':
+      console.log('取消收藏');
+      break;
+    case 'copy':
+      console.log('复制文件');
+      break;
+    case 'cut':
+      console.log('剪切文件');
+      break;
+    case 'rename':
+      console.log('重命名文件');
+      break;
+    case 'delete':
+      console.log('删除文件');
+      break;
+    case 'properties':
+      console.log('查看属性');
+      break;
+    case 'permission':
+      console.log('更新权限');
+      isUpdatePermissionModalOpen.value = true;
+      break;
+    default:
+      console.log(`未知操作: ${action}`);
+  }
+
+  hideContextMenu();
 };
 
 onMounted(() => {

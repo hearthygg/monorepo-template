@@ -1,3 +1,5 @@
+import type { FilePermissionLevel } from '@/constants/enum';
+
 /**
  * 创建文件夹
  */
@@ -68,6 +70,10 @@ export interface FileTreeDto {
    * 文件/文件夹更新时间
    */
   updatedAt: string;
+  /**
+   * 文件/文件夹权限
+   */
+  permission: FilePermissionLevel;
 }
 
 /**
@@ -112,4 +118,66 @@ interface UploadProgressEvent {
 export interface UploadOptions extends UploadFileDto {
   file: File;
   onProgress?: (event: UploadProgressEvent) => void;
+}
+
+/**
+ * 文件/文件夹权限列表项
+ */
+export interface FilePermissionListItemDto {
+  /**
+   * 用户头像URL
+   */
+  avatar: null | string;
+  /**
+   * 继承自哪个文件/文件夹ID，仅当permissionSource为inherited时有值
+   */
+  inheritedFrom: number | null;
+  /**
+   * 用户是否为文件/文件夹所有者
+   */
+  isOwner: boolean;
+  /**
+   * 用户昵称
+   */
+  nickname: null | string;
+  permission: FilePermissionLevel;
+  permissionSource: PermissionSource;
+  /**
+   * 用户ID
+   */
+  userId: number;
+}
+
+/**
+ * PermissionSource，权限来源：direct(直接设置)、inherited(继承)、team(团队默认)
+ */
+export enum PermissionSource {
+  Direct = 'direct',
+  Inherited = 'inherited',
+  Team = 'team'
+}
+
+/**
+ * 更新文件/文件夹权限
+ */
+export interface UpdatePermissionsDto {
+  /**
+   * 用户权限列表
+   */
+  permissions: UserPermissionDto[];
+  /**
+   * 是否传播到子文件/文件夹
+   */
+  shouldPropagate: boolean;
+}
+
+/**
+ * UserPermissionDto
+ */
+export interface UserPermissionDto {
+  permission: number;
+  /**
+   * 用户ID
+   */
+  userId: number;
 }

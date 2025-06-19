@@ -13,6 +13,9 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom' // 使用 jsdom 环境进行测试
       // setupFiles: './tests/setup.js', // 可选：设置测试前的初始化文件
     },
+    define: {
+      'process.env': {}
+    },
     base: env.VITE_BASE, // 设置公共路径
     server: {
       host: '0.0.0.0',

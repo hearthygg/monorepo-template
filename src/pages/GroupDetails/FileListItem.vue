@@ -1,5 +1,5 @@
 <template>
-  <div class="group flex items-center gap-4 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-200 hover:bg-blue-50/20 transition-all" @click="emit('click', file)">
+  <div class="group flex items-center gap-4 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-200 hover:bg-blue-50/20 transition-all" @contextmenu.prevent="handleContextMenu" @click="emit('click', file)">
     <!-- 选择框 -->
     <div class="flex items-center">
       <input type="checkbox" :checked="isSelected" class="opacity-0 group-hover:opacity-100 transition-opacity rounded border-gray-300" @change="(e: Event) => emit('select', file.id, (e.target as HTMLInputElement).checked)" @click.stop />
@@ -41,7 +41,7 @@
 
     <!-- 操作菜单 -->
     <div class="flex-shrink-0">
-      <button class="p-1 hover:bg-gray-200 rounded transition-colors">
+      <button class="p-1 hover:bg-gray-200 rounded transition-colors" @click.stop="handleMoreClick">
         <MoreHorizontal class="h-4 w-4" />
       </button>
     </div>
@@ -80,6 +80,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'select', fileId: number, checked: boolean): void;
   (e: 'click', file: FileTreeDto): void;
+  (e: 'contextmenu', file: FileTreeDto, event: MouseEvent): void;
 }>();
 
 const getFileIcon = (): typeof File => {
@@ -115,5 +116,12 @@ const formatDate = (date: Date): string => {
     hour: '2-digit',
     minute: '2-digit'
   }).format(date);
+};
+
+const handleMoreClick = (): void => {
+  console.log('more click');
+};
+const handleContextMenu = (e: MouseEvent): void => {
+  emit('contextmenu', props.file, e);
 };
 </script>

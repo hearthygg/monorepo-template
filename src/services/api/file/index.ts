@@ -1,6 +1,6 @@
 import http from '@/services/http';
 import type { AxiosPromise } from 'axios';
-import type { CreateFolderDto, FileTreeDto, UploadOptions } from './types';
+import type { CreateFolderDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
 
 // 在团队空间中创建文件夹
 export const createFolderApi = (data: CreateFolderDto): AxiosPromise<any> => {
@@ -22,7 +22,7 @@ export const getFileTreeApi = (teamId: number): AxiosPromise<FileTreeDto[]> => {
   });
 };
 
-// 2. 封装上传方法
+// 2. 封装上传文件方法
 export const uploadFileApi = (options: UploadOptions): AxiosPromise<any> => {
   const { file, name, teamId, parentId, onProgress } = options;
 
@@ -56,5 +56,22 @@ export const uploadFileApi = (options: UploadOptions): AxiosPromise<any> => {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
+  });
+};
+
+// 获取文件/文件夹的权限列表
+export const getFilePermissionListApi = (fileId: number): AxiosPromise<FilePermissionListItemDto[]> => {
+  return http({
+    url: `/files/${fileId}/permissions`,
+    method: 'get'
+  });
+};
+
+// 更新文件/文件夹权限
+export const updateFilePermissionApi = (fileId: number, data: UpdatePermissionsDto) => {
+  return http({
+    url: `/files/${fileId}/permissions`,
+    method: 'put',
+    data
   });
 };

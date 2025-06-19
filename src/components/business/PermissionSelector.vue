@@ -8,16 +8,16 @@
           {
             'border-blue-500 bg-blue-50': isSelected(option.value),
             'border-blue-200 bg-blue-25': isIncluded(option.value) && mode === 'cascade' && !isSelected(option.value),
-            'shadow-md': hoveredOption === option.value && !disabled,
+            // 'shadow-md': hoveredOption === option.value && !disabled,
             'opacity-50 cursor-not-allowed': disabled,
-            'min-w-[200px]': layout === 'horizontal',
-            'transform scale-105': hoveredOption === option.value && !disabled
+            'min-w-[200px]': layout === 'horizontal'
+            // 'transform scale-105': hoveredOption === option.value && !disabled
           },
           sizeClasses.card
         ]"
       >
         <!-- 选中状态指示器 -->
-        <div v-if="isSelected(option.value)" class="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1 animate-scale-in">
+        <div v-if="isSelected(option.value)" class="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
           <CheckIcon class="h-3 w-3" />
         </div>
 
@@ -61,24 +61,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Lock, Eye, Edit3, Trash2, Check } from 'lucide-vue-next';
-import { FilePermissionLevel } from '@/services/types';
+import { FilePermissionLevel } from '@/constants/enum';
+import type { PermissionOption, PermissionSelectorProps } from '@/types/permissions';
 
-interface PermissionOption {
-  label: string;
-  value: FilePermissionLevel;
-  icon: string;
-  description: string;
-  color: string;
-}
-
-interface PermissionSelectorProps {
-  modelValue?: FilePermissionLevel | FilePermissionLevel[];
-  mode?: 'single' | 'multiple' | 'cascade';
-  disabled?: boolean;
-  size?: 'sm' | 'md' | 'lg';
-  layout?: 'vertical' | 'horizontal' | 'grid';
-  showDescription?: boolean;
-}
 // 图标组件映射
 const iconComponents = {
   Lock,
@@ -210,13 +195,13 @@ const getIconComponent = (iconName: string) => {
   transition: all 0.2s ease-in-out;
 }
 
-.permission-option:hover .permission-card:not(.opacity-50) {
+/* .permission-option:hover .permission-card:not(.opacity-50) {
   transform: scale(1.02);
 }
 
 .permission-option:active .permission-card:not(.opacity-50) {
   transform: scale(0.98);
-}
+} */
 
 @keyframes scale-in {
   from {

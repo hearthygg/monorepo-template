@@ -3,11 +3,11 @@ import { ref, reactive, watch } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import type { SendJoinTeamInvitationDto } from '@/services/types';
-import { FilePermissionLevel, InviteType, Source } from '@/services/types';
+import { InviteType, Source } from '@/services/types';
 import { sendJoinTeamInvitationApi } from '@/services';
 import PermissionSelector from './PermissionSelector.vue';
 import { CopyDocument } from '@element-plus/icons-vue';
-
+import { FilePermissionLevel } from '@/constants/enum';
 interface Props {
   modelValue: boolean;
   title?: string;

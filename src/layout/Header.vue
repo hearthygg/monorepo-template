@@ -38,7 +38,7 @@ const handleCommand = (command: string) => {
           <Icon icon="mdi:bell-outline" class="w-5 h-5 text-gray-600" />
         </el-button>
       </el-badge>
-      <el-dropdown trigger="click" @command="handleCommand">
+      <!-- <el-dropdown trigger="click" @command="handleCommand">
         <div class="w-7 h-7 cursor-pointer">
           <img class="w-full h-full rounded-full" src="@/assets/images/logo.png" alt="" />
         </div>
@@ -58,7 +58,7 @@ const handleCommand = (command: string) => {
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
-      </el-dropdown>
+      </el-dropdown> -->
     </div>
   </header>
 </template>

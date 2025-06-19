@@ -1,3 +1,5 @@
+import type { FilePermissionLevel } from '@/constants/enum';
+
 /**
  * 团队列表
  */
@@ -112,20 +114,6 @@ export enum InviteType {
   Email = 'email',
   Link = 'link',
   Userid = 'user_id'
-}
-
-/**
- * 团队空间权限
- */
-export enum FilePermissionLevel {
-  /** 没权限 */
-  NONE = 0,
-  /** 可查看 */
-  VIEW = 1,
-  /** 可编辑 */
-  EDIT = 2,
-  /** 可删除 */
-  DELETE = 3
 }
 
 /**

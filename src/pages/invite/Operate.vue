@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/user';
 import AuthForm from '@/components/business/AuthForm.vue';
 import { acceptInvitationApi, rejectInvitationApi, checkInvitationApi } from '@/services/api/team';
 import type { InvitationValidateResultDto } from '@/services/api/team/types';
-import { FilePermissionLevel } from '@/services/api/team/types';
+import { FilePermissionLevel } from '@/constants/enum';
 import { UserFilled, Message, Check, Close, Loading } from '@element-plus/icons-vue';
 
 const route = useRoute();
