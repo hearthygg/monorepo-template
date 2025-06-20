@@ -57,7 +57,7 @@ onMounted(async () => {
     <div>
       <div class="flex justify-between items-center mb-3">
         <h2 class="text-lg font-semibold">我的团队空间</h2>
-        <el-button type="primary" @click="createTeamModalVisible = true"><Icon icon="material-symbols:add-rounded" class="w-5 h-5 mr-1" />创建团队</el-button>
+        <el-button type="primary" @click="createTeamModalVisible = true"><Icon icon="material-symbols:add-rounded" class="w-4 h-4 mr-1" />创建团队</el-button>
       </div>
       <div class="flex gap-4 mb-8">
         <template v-for="team in teams" :key="team.id">

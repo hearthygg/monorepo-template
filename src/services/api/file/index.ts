@@ -1,6 +1,6 @@
 import http from '@/services/http';
 import type { AxiosPromise } from 'axios';
-import type { CreateFolderDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
+import type { CreateFolderDto, FileInfoDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
 
 // 在团队空间中创建文件夹
 export const createFolderApi = (data: CreateFolderDto): AxiosPromise<any> => {
@@ -73,5 +73,52 @@ export const updateFilePermissionApi = (fileId: number, data: UpdatePermissionsD
     url: `/files/${fileId}/permissions`,
     method: 'put',
     data
+  });
+};
+
+// 删除文件/文件夹
+export const deleteFileApi = (fileId: number) => {
+  return http({
+    url: `/files/${fileId}`,
+    method: 'delete'
+  });
+};
+
+// 重命名文件/文件夹
+export const renameFileApi = (fileId: number, renameFileDto: { name: string }) => {
+  return http({
+    url: `/files/${fileId}/rename`,
+    method: 'patch',
+    data: renameFileDto
+  });
+};
+
+// 查看文件/文件夹属性
+export const getFileInfoApi = (fileId: number): AxiosPromise<FileInfoDto> => {
+  return http({
+    url: `/files/${fileId}/info`,
+    method: 'get'
+  });
+};
+
+// 下载文件
+export const downloadFileApi = (fileId: number, filename?: string): AxiosPromise<Blob> => {
+  return http({
+    url: `/files/${fileId}/download`,
+    method: 'get',
+    responseType: 'blob',
+    params: {
+      filename
+    }
+  });
+};
+
+// 批量下载文件
+export const downloadMultipleFilesApi = (fileIds: number[]): AxiosPromise<Blob> => {
+  return http({
+    url: '/files/download/multiple',
+    method: 'post',
+    data: { fileIds },
+    responseType: 'blob'
   });
 };

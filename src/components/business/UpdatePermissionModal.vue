@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="visible" width="1050px" :close-on-click-modal="false" @closed="handleClose">
+  <el-dialog v-model="visible" class="custom-dialog" width="1050px" :close-on-click-modal="false" @closed="handleClose">
     <template #title>
       <div class="flex items-center gap-2">
         <component :is="getFileIcon()" class="h-6 w-6" />
@@ -34,8 +34,8 @@
 
     <template #footer>
       <div class="flex justify-end space-x-2">
-        <el-button @click="visible = false">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleConfirm"> 确认 </el-button>
+        <el-button @click="visible = false"><X class="mr-1 w-4 h-4" />取消</el-button>
+        <el-button type="primary" :loading="loading" @click="handleConfirm"><Check class="mr-1 w-4 h-4" />确认</el-button>
       </div>
     </template>
   </el-dialog>
@@ -48,7 +48,7 @@ import PermissionSelector from '@/components/business/PermissionSelector.vue';
 import { getFilePermissionListApi, updateFilePermissionApi } from '@/services/api/file';
 import { File, Folder, FileText, FileSpreadsheet, FileCode, ImageIcon } from 'lucide-vue-next';
 import type { FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto } from '@/services/api/file/types';
-
+import { Check, X } from 'lucide-vue-next';
 const props = defineProps<{
   modelValue: boolean;
   file: FileTreeDto;

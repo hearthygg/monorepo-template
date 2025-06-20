@@ -28,7 +28,26 @@ const menuItems = computed<MenuItem[]>(() => {
   const { selectedFile, permission } = props;
 
   const items: MenuItem[] = [];
-  if (!selectedFile || !permission || selectedFile.id === 0) return items;
+  if (!selectedFile || !permission) return items;
+  if (selectedFile.id === 0) {
+    items.push(
+      {
+        id: 'createFolder',
+        label: '新建文件夹',
+        icon: FolderPlus,
+        shortcut: 'Enter',
+        action: () => emit('action', 'createFolder', selectedFile)
+      },
+      {
+        id: 'uploadFile',
+        label: '上传文件',
+        icon: Upload,
+        shortcut: 'Enter',
+        action: () => emit('action', 'uploadFile', selectedFile)
+      }
+    );
+    return items;
+  }
   // 预览权限
   if (permission >= FilePermissionLevel.VIEW) {
     // 打开/预览操作放在最前面
@@ -41,32 +60,32 @@ const menuItems = computed<MenuItem[]>(() => {
         action: () => emit('action', 'open', selectedFile)
       });
     } else {
-      items.push({
-        id: 'preview',
-        label: '预览',
-        icon: Eye,
-        shortcut: 'Space',
-        action: () => emit('action', 'preview', selectedFile)
-      });
+      items.push(
+        {
+          id: 'preview',
+          label: '预览',
+          icon: Eye,
+          shortcut: 'Space',
+          action: () => emit('action', 'preview', selectedFile)
+        },
+        {
+          id: 'download',
+          label: '下载',
+          icon: Download,
+          shortcut: 'Ctrl+D',
+          action: () => emit('action', 'download', selectedFile)
+        }
+      );
     }
 
     // 下载和分享等基础操作
-    items.push(
-      {
-        id: 'download',
-        label: '下载',
-        icon: Download,
-        shortcut: 'Ctrl+D',
-        action: () => emit('action', 'download', selectedFile)
-      },
-      {
-        id: 'share',
-        label: '分享',
-        icon: Share2,
-        shortcut: 'Ctrl+Shift+S',
-        action: () => emit('action', 'share', selectedFile)
-      }
-    );
+    items.push({
+      id: 'share',
+      label: '分享',
+      icon: Share2,
+      shortcut: 'Ctrl+Shift+S',
+      action: () => emit('action', 'share', selectedFile)
+    });
   }
 
   // 添加基础操作和编辑操作之间的分隔线

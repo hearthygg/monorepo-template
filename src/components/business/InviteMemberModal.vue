@@ -8,6 +8,7 @@ import { sendJoinTeamInvitationApi } from '@/services';
 import PermissionSelector from './PermissionSelector.vue';
 import { CopyDocument } from '@element-plus/icons-vue';
 import { FilePermissionLevel } from '@/constants/enum';
+import { Check, X, Mail, Link, User, Home, ExternalLink } from 'lucide-vue-next';
 interface Props {
   modelValue: boolean;
   title?: string;
@@ -28,13 +29,13 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 const inviteTypeOptions = [
-  { label: '邮箱邀请', value: InviteType.Email },
-  { label: '链接邀请', value: InviteType.Link },
-  { label: '站内邀请', value: InviteType.Userid }
+  { label: '邮箱邀请', value: InviteType.Email, icon: Mail },
+  { label: '链接邀请', value: InviteType.Link, icon: Link },
+  { label: '站内邀请', value: InviteType.Userid, icon: User }
 ];
 const sourceOptions = [
-  { label: '站内', value: Source.Internal },
-  { label: '外部', value: Source.External }
+  { label: '站内', value: Source.Internal, icon: Home },
+  { label: '外部', value: Source.External, icon: ExternalLink }
 ];
 
 const form = reactive<SendJoinTeamInvitationDto>({
@@ -151,13 +152,21 @@ const handleCopy = async () => {
 </script>
 
 <template>
-  <el-dialog :model-value="modelValue" :title="title" :width="width" :close-on-click-modal="false" @update:model-value="val => emit('update:modelValue', val)" @close="handleClose">
+  <el-dialog class="custom-dialog" :model-value="modelValue" :title="title" :width="width" :close-on-click-modal="false" @update:model-value="val => emit('update:modelValue', val)" @close="handleClose">
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top" style="padding-right: 8px" @submit.prevent>
       <el-divider content-position="left">基础信息</el-divider>
       <el-form-item label="邀请类型" prop="type">
-        <el-select v-model="form.type" placeholder="请选择邀请类型">
+        <!-- <el-select v-model="form.type" placeholder="请选择邀请类型">
           <el-option v-for="item in inviteTypeOptions" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
+        </el-select> -->
+        <el-radio-group v-model="form.type">
+          <el-radio v-for="item in inviteTypeOptions" :key="item.value" :value="item.value">
+            <div class="flex items-center space-x-2">
+              <component :is="item.icon" class="mr-1 w-4 h-4" />
+              {{ item.label }}
+            </div>
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item v-if="form.type === InviteType.Email" label="成员邮箱" prop="email">
         <el-input v-model="form.email" placeholder="请输入成员邮箱" />
@@ -167,12 +176,20 @@ const handleCopy = async () => {
         <!-- 实际项目可用下拉/搜索用户组件替换 -->
       </el-form-item>
       <el-form-item label="邀请权限" prop="permission">
-        <PermissionSelector v-model="form.permission" mode="cascade" size="md" layout="grid" :show-description="true" :disabled="false" />
+        <PermissionSelector v-model="form.permission" mode="cascade" size="sm" layout="horizontal" :show-description="true" :disabled="false" />
       </el-form-item>
       <el-form-item label="邀请来源" prop="source">
-        <el-select v-model="form.source" placeholder="请选择邀请来源">
+        <!-- <el-select v-model="form.source" placeholder="请选择邀请来源">
           <el-option v-for="item in sourceOptions" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
+        </el-select> -->
+        <el-radio-group v-model="form.source">
+          <el-radio v-for="item in sourceOptions" :key="item.value" :value="item.value">
+            <div class="flex items-center space-x-2">
+              <component :is="item.icon" class="mr-1 w-4 h-4" />
+              {{ item.label }}
+            </div>
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-divider content-position="left">提醒设置</el-divider>
       <el-row :gutter="16">
@@ -204,11 +221,19 @@ const handleCopy = async () => {
           </template>
         </el-input>
       </el-form-item>
-      <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleSubmit">确定</el-button>
-      </div>
     </el-form>
+    <template #footer>
+      <div class="flex justify-end space-x-2">
+        <el-button @click="handleClose">
+          <X class="mr-1 w-4 h-4" />
+          取消
+        </el-button>
+        <el-button type="primary" :loading="loading" @click="handleSubmit">
+          <Check class="mr-1 w-4 h-4" />
+          确定
+        </el-button>
+      </div>
+    </template>
   </el-dialog>
 </template>
 

@@ -11,7 +11,7 @@
         </button>
       </div>
       <div class="ml-2 mt-2">
-        <BreadcrumbNav :is-trigger="false" :items="items" />
+        <BreadcrumbNav :is-trigger="false" :items="breadcrumbItems" />
       </div>
 
       <!-- 内容区域 -->
@@ -70,14 +70,41 @@ import { X, Upload, Loader2, File, CheckCircle, AlertCircle } from 'lucide-vue-n
 import { uploadFileApi } from '@/services/api/file';
 import { ElMessage } from 'element-plus';
 import BreadcrumbNav from './BreadcrumbNav.vue';
+import type { BreadcrumbItem } from '@/types/file';
+import type { FileTreeDto } from '@/services/api/file/types';
 
 // Props 定义
 const props = defineProps<{
   teamId: number;
   folderId: number;
-  items: any;
+  teamName: string;
+  fileTree: FileTreeDto[];
 }>();
+// 计算属性 面包屑导航文件路径
+const breadcrumbItems = computed((): BreadcrumbItem[] => {
+  const findPath = (nodes: FileTreeDto[], targetId: number, path: FileTreeDto[] = []): FileTreeDto[] | null => {
+    for (const node of nodes) {
+      const newPath = [...path, node];
+      if (node.id === targetId) return newPath;
+      if (node.children) {
+        const found = findPath(node.children, targetId, newPath);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
 
+  const path = findPath(props.fileTree, props.folderId);
+  if (path) {
+    return path.map(node => ({
+      id: node.id,
+      name: node.name === '团队文件' ? props.teamName : node.name,
+      type: node.id === 0 ? 'home' : 'folder'
+    }));
+  }
+
+  return [{ id: 0, name: props.teamName, type: 'home' }];
+});
 // 类型定义
 type UploadStatus = 'pending' | 'uploading' | 'success' | 'error';
 

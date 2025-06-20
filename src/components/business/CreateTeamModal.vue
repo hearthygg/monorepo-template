@@ -4,6 +4,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { createTeamApi } from '@/services';
 import type { CreateTeamDto } from '@/services/types';
+import { Check, X } from 'lucide-vue-next';
 
 interface Props {
   modelValue: boolean;
@@ -91,7 +92,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <el-dialog :model-value="modelValue" :title="title" :width="width" :close-on-click-modal="false" @update:model-value="val => emit('update:modelValue', val)" @close="handleClose">
+  <el-dialog class="custom-dialog" :model-value="modelValue" :title="title" :width="width" :close-on-click-modal="false" @update:model-value="val => emit('update:modelValue', val)" @close="handleClose">
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent>
       <el-form-item label="团队名称" prop="name">
         <el-input v-model="form.name" placeholder="请输入团队名称" :maxlength="20" show-word-limit />
@@ -122,9 +123,9 @@ const handleSubmit = async () => {
     </el-form>
 
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="handleSubmit"> 创建 </el-button>
+      <div class="flex justify-end space-x-2">
+        <el-button @click="handleClose"><X class="mr-1 w-4 h-4" />取消</el-button>
+        <el-button type="primary" :loading="loading" @click="handleSubmit"><Check class="mr-1 w-4 h-4" />创建</el-button>
       </div>
     </template>
   </el-dialog>

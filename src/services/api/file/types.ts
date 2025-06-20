@@ -181,3 +181,117 @@ export interface UserPermissionDto {
    */
   userId: number;
 }
+
+/**
+ * 文件/文件夹属性
+ */
+export interface FileInfoDto {
+  /**
+   * 文件访问URL，文件夹为null
+   */
+  accessUrl: null | string;
+  /**
+   * 创建时间
+   */
+  createdAt: Date;
+  /**
+   * 文件扩展名，文件夹为null
+   */
+  ext: null | string;
+  /**
+   * 子文件数量（仅文件夹）
+   */
+  fileCount: number | null;
+  /**
+   * 子文件夹数量（仅文件夹）
+   */
+  folderCount: number | null;
+  /**
+   * 文件/文件夹ID
+   */
+  id: number;
+  /**
+   * 是否为文件夹
+   */
+  isFolder: boolean;
+  /**
+   * 当前用户是否为所有者
+   */
+  isOwner: boolean;
+  /**
+   * 文件/文件夹名称
+   */
+  name: string;
+  /**
+   * 所有者信息
+   */
+  owner: FileOwnerInfoDto;
+  /**
+   * 父文件夹信息
+   */
+  parent: ParentFolderInfoDto;
+  permission: number;
+  /**
+   * 文件大小（字节），文件夹为null
+   */
+  size: number | null;
+  /**
+   * 所属团队信息
+   */
+  team: TeamInfoDto;
+  /**
+   * 总大小（仅文件夹，字节）
+   */
+  totalSize: number | null;
+  /**
+   * 更新时间
+   */
+  updatedAt: Date;
+}
+
+/**
+ * 所有者信息
+ */
+export interface FileOwnerInfoDto {
+  /**
+   * 用户头像URL
+   */
+  avatar: null | string;
+  /**
+   * 用户ID
+   */
+  id: number;
+  /**
+   * 用户昵称
+   */
+  nickname: null | string;
+}
+
+/**
+ * 父文件夹信息
+ */
+export interface ParentFolderInfoDto {
+  /**
+   * 父文件夹ID
+   */
+  id: number | null;
+  /**
+   * 父文件夹名称
+   */
+  name: null | string;
+}
+
+/**
+ * 所属团队信息
+ * TeamInfoDto
+ */
+export interface TeamInfoDto {
+  /**
+   * 团队ID
+   */
+  id: number;
+  /**
+   * 团队名称
+   */
+  name: string;
+}

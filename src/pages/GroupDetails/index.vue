@@ -249,7 +249,7 @@
     </div>
 
     <!-- 邀请成员模态框 -->
-    <InviteMemberModal v-model="isInviteModalOpen" width="700px" :team-id="currentTeamId" @success="handleInviteMember" />
+    <InviteMemberModal v-model="isInviteModalOpen" width="900px" :team-id="currentTeamId" @success="handleInviteMember" />
   </div>
 </template>
 
