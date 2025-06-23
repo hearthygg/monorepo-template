@@ -2,12 +2,19 @@
 import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
+import MonacoEditorPlugin from 'vite-plugin-monaco-editor';
 
 export default defineConfig(({ mode }) => {
   // 读取 .env 文件
   const env = loadEnv(mode, process.cwd());
   return {
-    plugins: [vue(), tailwindcss()],
+    plugins: [
+      vue(),
+      tailwindcss(),
+      MonacoEditorPlugin({
+        languageWorkers: ['editorWorkerService', 'typescript', 'json', 'css', 'html']
+      })
+    ],
     test: {
       globals: true, // 允许在测试文件中直接使用 describe, it 等全局变量
       environment: 'jsdom' // 使用 jsdom 环境进行测试

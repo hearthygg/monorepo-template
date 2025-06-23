@@ -2,9 +2,6 @@
   <div class="flex h-full bg-white">
     <!-- 左侧文件树 -->
     <div class="w-64 border-r border-gray-200 flex flex-col">
-      <!-- <div class="p-3 border-b border-gray-200">
-        <h3 class="text-sm font-medium text-gray-900">文件夹</h3>
-      </div> -->
       <div class="flex-1 overflow-y-auto p-2">
         <div v-for="node in fileTree" :key="node.id">
           <TreeNode
@@ -127,11 +124,14 @@
 
     <!-- 查看文件属性模态框 -->
     <FilePropertiesModal v-model="isFilePropertiesModalOpen" :file-id="contextMenu.selectedFile?.id || null" />
+
+    <!-- 文件预览/编辑窗口管理器 -->
+    <WindowManager />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onBeforeMount, nextTick } from 'vue';
 import { Search, Download, Trash2, List, Grid, FolderPlus, Upload, Folder } from 'lucide-vue-next';
 import TreeNode from './TreeNode.vue';
 import BreadcrumbNav from './BreadcrumbNav.vue';
@@ -147,6 +147,11 @@ import { useContextMenu } from '@/components/contextMenu/useContextMenu';
 import UpdatePermissionModal from '@/components/business/UpdatePermissionModal.vue';
 import FilePropertiesModal from '@/components/business/FilePropertiesModal.vue';
 import type { BreadcrumbItem } from '@/types/file';
+import WindowManager from '@/components/WindowManager/WindowManager.vue';
+import { useWindowManager } from '@/composables/useWindowManager';
+import { formatFileSize } from '@/utils/file';
+
+const { openFilePreview } = useWindowManager();
 
 // 类型定义
 type ViewMode = 'list' | 'grid';
@@ -272,6 +277,7 @@ const handleFileClick = (item: FileTreeDto): void => {
 const handleFileContextMenu = (item: FileTreeDto, e: MouseEvent, type: string): void => {
   showContextMenu(e, item, item.permission);
   currentContextMenuType.value = type;
+  console.log(e.clientX, e.clientY);
 };
 
 const handleFileUploadSuccess = async (): Promise<void> => {
@@ -307,6 +313,7 @@ const handleContextMenuAction = async (action: string, file: FileTreeDto) => {
       break;
     case 'preview':
       console.log('预览文件');
+      openFilePreview(file);
       break;
     case 'download':
       console.log('下载文件');
@@ -568,15 +575,7 @@ const handleBulkDownload = async () => {
   }
 };
 
-// 格式化文件大小
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-};
-
-onMounted(() => {
+onBeforeMount(() => {
   getFileTree();
 });
 </script>

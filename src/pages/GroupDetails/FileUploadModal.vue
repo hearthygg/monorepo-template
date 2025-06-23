@@ -72,6 +72,7 @@ import { ElMessage } from 'element-plus';
 import BreadcrumbNav from './BreadcrumbNav.vue';
 import type { BreadcrumbItem } from '@/types/file';
 import type { FileTreeDto } from '@/services/api/file/types';
+import { formatFileSize } from '@/utils/file';
 
 // Props 定义
 const props = defineProps<{
@@ -254,18 +255,18 @@ const getStatusIcon = (status: UploadStatus) => {
   }
 };
 
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0.0 B';
-  // 定义文件大小的单位数组，依次对应：字节（B）、千字节（KB）、兆字节（MB）、吉字节（GB）
-  // 数组索引 0 到 3 分别对应 1024^0 到 1024^3 的量级
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  // 对数的换底公式：log_a(b) = log_c(b) / log_c(a)
-  // Math.log(bytes) / Math.log(1024) 等价于以 1024 为底的对数（即 log₁₀₂₄(bytes)）
-  // 计算量级指数i
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  // 计算当前量级下的文件大小，并保留一位小数
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-};
+// const formatFileSize = (bytes: number): string => {
+//   if (bytes === 0) return '0.0 B';
+//   // 定义文件大小的单位数组，依次对应：字节（B）、千字节（KB）、兆字节（MB）、吉字节（GB）
+//   // 数组索引 0 到 3 分别对应 1024^0 到 1024^3 的量级
+//   const sizes = ['B', 'KB', 'MB', 'GB'];
+//   // 对数的换底公式：log_a(b) = log_c(b) / log_c(a)
+//   // Math.log(bytes) / Math.log(1024) 等价于以 1024 为底的对数（即 log₁₀₂₄(bytes)）
+//   // 计算量级指数i
+//   const i = Math.floor(Math.log(bytes) / Math.log(1024));
+//   // 计算当前量级下的文件大小，并保留一位小数
+//   return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+// };
 
 const closeModal = (): void => {
   emit('close');

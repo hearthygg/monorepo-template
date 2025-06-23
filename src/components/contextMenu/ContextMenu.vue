@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div v-if="visible && items.length > 0" class="fixed inset-0 z-50" @click="handleBackdropClick" @contextmenu.prevent>
-      <div ref="menuRef" class="absolute bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-48 max-w-64" :style="menuStyle" @click.stop>
+      <div ref="menuRef" class="absolute bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-48 max-w-64" :style="style" @click.stop>
         <template v-for="(item, index) in items" :key="item.id || index">
           <!-- 分割线 -->
           <div v-if="item.separator" class="h-px bg-gray-200 my-1" />
@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
 import type { MenuItem, ContextMenuProps } from '@/types/contextMenu';
 
@@ -71,27 +71,52 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const menuRef = ref<HTMLElement>();
+const menuRef = ref<HTMLDivElement | null>(null);
 const hoveredIndex = ref<number>(-1);
+const menuHeight = ref(0);
 
-// 计算菜单位置
-const menuStyle = computed(() => {
-  const style: Record<string, string> = {
-    left: `${props.x}px`,
-    top: `${props.y}px`
+// 监听菜单显示，然后获取其高度
+watch(
+  () => props.visible,
+  async newValue => {
+    if (newValue) {
+      await nextTick();
+      if (menuRef.value) {
+        menuHeight.value = menuRef.value.offsetHeight;
+      }
+    }
+  }
+);
+
+const style = computed(() => {
+  const { x, y } = props;
+  const style: { top: string; left: string } = {
+    top: `${y}px`,
+    left: `${x}px`
   };
 
-  // 防止菜单超出屏幕边界
-  if (typeof window !== 'undefined') {
-    const menuWidth = 200; // 估算菜单宽度
-    const menuHeight = props.items.length * 40; // 估算菜单高度
+  if (typeof window !== 'undefined' && menuRef.value) {
+    const menuWidth = menuRef.value.offsetWidth || 200; // 使用实际宽度或估算
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
 
-    if (props.x + menuWidth > window.innerWidth) {
-      style.left = `${props.x - menuWidth}px`;
+    // 水平方向处理
+    if (x + menuWidth > viewportWidth) {
+      style.left = `${x - menuWidth}px`;
     }
 
-    if (props.y + menuHeight > window.innerHeight) {
-      style.top = `${props.y - menuHeight}px`;
+    // 垂直方向智能处理
+    const spaceBelow = viewportHeight - y;
+    const spaceAbove = y;
+
+    if (spaceBelow < menuHeight.value) {
+      if (spaceAbove > menuHeight.value) {
+        // 上方空间足够，则在上方显示
+        style.top = `${y - menuHeight.value}px`;
+      } else {
+        // 两边都不够，则贴近底部边缘显示
+        style.top = `${viewportHeight - menuHeight.value - 5}px`; // 减5px留出边距
+      }
     }
   }
 

@@ -145,6 +145,7 @@ import { X, AlertCircle, File, Folder, FileText, Image, FileSpreadsheet, FileCod
 import { getFileInfoApi } from '@/services/api/file';
 import type { FileInfoDto } from '@/services/api/file/types';
 import { ElMessage } from 'element-plus';
+import { formatFileSize, formatDate } from '@/utils/file';
 
 const props = defineProps<{
   modelValue: boolean;
@@ -251,23 +252,6 @@ const getFileTypeText = (ext: string | null) => {
   };
 
   return typeMap[ext.toLowerCase()] || `${ext.toUpperCase()}文件`;
-};
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-};
-
-const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(date));
 };
 
 const getPermissionText = (permission: number): string => {

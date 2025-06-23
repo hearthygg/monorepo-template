@@ -7,13 +7,12 @@
       @dblclick="handleDoubleClick"
     >
       <button v-if="node.isFolder" class="mr-1 p-0.5 hover:bg-gray-200 rounded" @click.stop="$emit('toggle', node.id)">
-        <ChevronDown v-if="isExpanded" class="h-3 w-3" />
-        <ChevronRight v-else class="h-3 w-3" />
+        <ChevronDown v-if="isExpanded" class="h-4 w-4" />
+        <ChevronRight v-else class="h-4 w-4" />
       </button>
 
-      <FolderOpen v-if="node.isFolder && isExpanded" class="h-4 w-4 mr-2 text-blue-500" />
-      <Folder v-else-if="node.isFolder" class="h-4 w-4 mr-2 text-blue-500" />
-
+      <Icon v-if="node.isFolder" :icon="getIconNameByFile(isExpanded ? 'folder-open' : 'folder')" class="h-5 w-5 mr-2 text-blue-500 flex-shrink-0" />
+      <Icon v-else :icon="getIconNameByFile(node.ext || '')" class="ml-3 h-5 w-5 mr-2 text-blue-500 flex-shrink-0" />
       <!-- 重命名输入框 -->
       <input
         v-if="isRenaming"
@@ -51,8 +50,10 @@
 
 <script setup lang="ts">
 import { computed, ref, nextTick, watch } from 'vue';
-import { ChevronDown, ChevronRight, Folder, FolderOpen } from 'lucide-vue-next';
+import { ChevronDown, ChevronRight } from 'lucide-vue-next';
 import type { FileTreeDto } from '@/services/api/file/types';
+import { Icon } from '@iconify/vue';
+import { getIconNameByFile } from '@/utils/file-icon-map';
 
 // Props 定义
 const props = defineProps<{

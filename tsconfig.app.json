@@ -8,10 +8,11 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "types": ["element-plus/global","node"],
+    "types": ["element-plus/global"],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
-    },
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

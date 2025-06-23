@@ -3,7 +3,7 @@
   <div
     v-if="viewMode === 'list'"
     class="group flex items-center gap-4 p-3 rounded-lg cursor-pointer border border-transparent hover:border-gray-200 hover:bg-blue-50/20 transition-all"
-    @contextmenu.prevent="handleContextMenu"
+    @contextmenu.prevent.stop="handleContextMenu"
     @click="handleClick"
     @dblclick="handleDoubleClick"
   >
@@ -14,7 +14,7 @@
 
     <!-- 文件图标 -->
     <div class="flex-shrink-0">
-      <component :is="getFileIcon()" class="h-8 w-8" />
+      <Icon :icon="fileIcon" class="h-6 w-6" />
     </div>
 
     <!-- 文件信息 -->
@@ -59,7 +59,7 @@
   </div>
 
   <!-- 网格模式 -->
-  <div v-else class="h-full group" @contextmenu.prevent.stop="handleContextMenu">
+  <div v-else class="h-full group">
     <div class="h-full cursor-pointer hover:shadow-md transition-all duration-300 bg-white rounded-lg border border-gray-200 relative">
       <!-- 选择框 -->
       <div class="absolute top-2 left-2 z-10">
@@ -75,7 +75,7 @@
       <div class="p-4 flex flex-col h-full" @click="handleClick" @dblclick="handleDoubleClick">
         <!-- 文件图标 -->
         <div class="flex justify-center mb-3">
-          <component :is="getFileIcon()" class="h-12 w-12" />
+          <Icon :icon="fileIcon" class="h-12 w-12" />
         </div>
 
         <!-- 文件信息 -->
@@ -119,7 +119,10 @@
 <script setup lang="ts">
 import { computed, ref, nextTick, watch } from 'vue';
 import type { FileTreeDto } from '@/services/api/file/types';
-import { FileText, ImageIcon, FileSpreadsheet, FileCode, File, Folder, Star, MoreHorizontal } from 'lucide-vue-next';
+import { MoreHorizontal } from 'lucide-vue-next';
+import { Icon } from '@iconify/vue';
+import { getIconNameByFile } from '@/utils/file-icon-map';
+import { formatFileSize } from '@/utils/file';
 
 // Props 定义
 const props = defineProps<{
@@ -167,39 +170,12 @@ watch(isRenaming, async newValue => {
   }
 });
 
-const getFileIcon = (): typeof File => {
+const fileIcon = computed(() => {
   if (props.file.isFolder) {
-    return Folder;
+    return getIconNameByFile('folder');
   }
-  switch (props.file.ext) {
-    case 'doc':
-      return FileText;
-    case 'image':
-      return ImageIcon;
-    case 'spreadsheet':
-      return FileSpreadsheet;
-    case 'code':
-      return FileCode;
-    default:
-      return File;
-  }
-};
-
-const formatFileSize = (bytes: number): string => {
-  if (!bytes || props.file.isFolder) return '';
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-};
-
-const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-};
+  return getIconNameByFile(props.file.ext || '');
+});
 
 const handleClick = (): void => {
   if (!isRenaming.value) {
