@@ -46,6 +46,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/im',
+    component: () => import('@/modules/IM/index.vue'),
+    name: 'IM',
+    meta: { title: 'IM', icon: 'homepage', affix: true }
+  },
+  {
     path: '/group-details/:id',
     component: () => import('@/pages/GroupDetails/index.vue'),
     meta: { hidden: true }

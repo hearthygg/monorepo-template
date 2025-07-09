@@ -74,6 +74,10 @@ export interface FileTreeDto {
    * 文件/文件夹权限
    */
   permission: FilePermissionLevel;
+  /**
+   * 是否可编辑
+   */
+  isEditable: boolean;
 }
 
 /**
@@ -193,7 +197,7 @@ export interface FileInfoDto {
   /**
    * 创建时间
    */
-  createdAt: Date;
+  createdAt: string;
   /**
    * 文件扩展名，文件夹为null
    */
@@ -246,7 +250,7 @@ export interface FileInfoDto {
   /**
    * 更新时间
    */
-  updatedAt: Date;
+  updatedAt: string;
 }
 
 /**
@@ -294,4 +298,22 @@ export interface TeamInfoDto {
    * 团队名称
    */
   name: string;
+}
+
+/**
+ * 可编辑文件内容
+ */
+export interface FileContentResponseDto {
+  /**
+   * 文件内容
+   */
+  content: string;
+  /**
+   * 文件编码
+   */
+  encoding: string;
+  /**
+   * 文件版本号
+   */
+  version: number;
 }

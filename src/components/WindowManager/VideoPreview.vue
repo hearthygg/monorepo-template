@@ -1,7 +1,7 @@
 <template>
   <div class="video-preview-container h-full flex flex-col">
     <!-- 工具栏 -->
-    <div class="toolbar bg-gray-50 px-4 py-2 flex items-center justify-between border-b border-gray-200">
+    <div v-if="false" class="toolbar bg-gray-50 px-4 py-2 flex items-center justify-between border-b border-gray-200">
       <div class="flex items-center gap-3">
         <Icon :icon="getIconNameByFile(file.ext || '')" class="h-5 w-5 text-purple-600" />
         <div>

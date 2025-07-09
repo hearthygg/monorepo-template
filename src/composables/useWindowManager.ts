@@ -105,9 +105,9 @@ export function useWindowManager() {
     }
   };
 
-  const openFilePreview = (file: FileTreeDto) => {
+  const openFileWindow = (file: FileTreeDto, type: WindowState['type'] = 'view', options?: Partial<Pick<WindowState, 'position' | 'size'>>) => {
     // 检查是否已经打开了相同文件
-    const existingWindow = windowManager.windows.find(w => w.type === 'file-preview' && w.data?.id === file.id);
+    const existingWindow = windowManager.windows.find(w => w.data?.id === file.id);
 
     if (existingWindow) {
       if (existingWindow.status === 'minimized') {
@@ -118,17 +118,15 @@ export function useWindowManager() {
       return existingWindow.id;
     }
 
-    return createWindow('file-preview', file.name, file);
+    return createWindow(type, file.name, file, options);
   };
 
   const getWindowIcon = (type: WindowState['type']): string => {
     switch (type) {
-      case 'file-preview':
+      case 'view':
         return '📄';
-      case 'folder':
+      case 'edit':
         return '📁';
-      case 'settings':
-        return '⚙️';
       default:
         return '🪟';
     }
@@ -150,7 +148,7 @@ export function useWindowManager() {
     focusWindow,
     updateWindowPosition,
     updateWindowSize,
-    openFilePreview,
+    openFileWindow,
     changeWindowStatus
   };
 }

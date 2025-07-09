@@ -1,6 +1,6 @@
 import http from '@/services/http';
 import type { AxiosPromise } from 'axios';
-import type { CreateFolderDto, FileInfoDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
+import type { CreateFolderDto, FileContentResponseDto, FileInfoDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
 
 // 在团队空间中创建文件夹
 export const createFolderApi = (data: CreateFolderDto): AxiosPromise<any> => {
@@ -120,5 +120,22 @@ export const downloadMultipleFilesApi = (fileIds: number[]): AxiosPromise<Blob> 
     method: 'post',
     data: { fileIds },
     responseType: 'blob'
+  });
+};
+
+// 获取可编辑文件内容
+export const getFileContentApi = (fileId: number): AxiosPromise<FileContentResponseDto> => {
+  return http({
+    url: `/files/${fileId}/content`,
+    method: 'get'
+  });
+};
+
+// 保存可编辑文件内容
+export const saveFileContentApi = (fileId: number, content: string) => {
+  return http({
+    url: `/files/${fileId}/content`,
+    method: 'put',
+    data: { content }
   });
 };

@@ -1,7 +1,7 @@
 <template>
   <div class="image-preview-container h-full flex flex-col">
     <!-- 工具栏 -->
-    <div class="toolbar bg-gray-50 px-4 py-2 flex items-center justify-between border-b border-gray-200">
+    <div class="toolbar px-4 py-2 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <Icon :icon="getIconNameByFile(file.ext || '')" class="h-5 w-5 text-green-600" />
         <div>
@@ -55,7 +55,7 @@
     </div>
 
     <!-- 图片预览区域 -->
-    <div class="image-viewer flex-1 relative bg-gray-100 overflow-hidden">
+    <div class="image-viewer flex-1 relative overflow-hidden">
       <div ref="imageContainer" class="w-full h-full flex items-center justify-center" @wheel="handleWheel" @mousedown="startPan" @mousemove="pan" @mouseup="stopPan" @mouseleave="stopPan">
         <img ref="imageElement" :src="file.path" :alt="file.name" class="transition-transform duration-200 ease-out" :style="imageStyle" @load="onImageLoad" @error="onImageError" />
       </div>

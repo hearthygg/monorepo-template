@@ -3,6 +3,9 @@ import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import MonacoEditorPlugin from 'vite-plugin-monaco-editor';
+// import Icons from 'unplugin-icons/vite';
+// import IconsResolver from 'unplugin-icons/resolver';
+// import Components from 'unplugin-vue-components/vite';
 
 export default defineConfig(({ mode }) => {
   // 读取 .env 文件
@@ -11,9 +14,22 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
       tailwindcss(),
-      MonacoEditorPlugin({
+      MonacoEditorPlugin.default({
         languageWorkers: ['editorWorkerService', 'typescript', 'json', 'css', 'html']
       })
+      // Iconify图标插件
+      // Icons({
+      //   autoInstall: true,
+      //   compiler: 'vue3'
+      // }),
+      // 自动导入Vue组件
+      // Components({
+      //   resolvers: [
+      //     IconsResolver({
+      //       prefix: 'Icon'
+      //     })
+      //   ]
+      // })
     ],
     test: {
       globals: true, // 允许在测试文件中直接使用 describe, it 等全局变量

@@ -24,7 +24,7 @@
         </div>
 
         <!-- 中间：视图切换按钮 -->
-        <div class="flex items-center bg-gray-100 rounded-lg p-1">
+        <!-- <div class="flex items-center bg-gray-100 rounded-lg p-1">
           <button :class="['px-3 py-2 text-sm font-medium rounded-md transition-all flex items-center', viewMode === 'dashboard' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900']" @click="viewMode = 'dashboard'">
             <BarChart3 class="h-4 w-4 mr-2" />
             数据看板
@@ -33,10 +33,15 @@
             <FolderOpen class="h-4 w-4 mr-2" />
             文件管理
           </button>
-        </div>
+        </div> -->
 
         <!-- 右侧：操作按钮 -->
         <div class="flex items-center space-x-2">
+          <el-tooltip content="交流中心" placement="bottom">
+            <div @click="openChatWindow">
+              <MessageSquareMore class="h-8 w-8 text-blue-700 cursor-pointer" />
+            </div>
+          </el-tooltip>
           <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium flex items-center transition-colors" @click="isInviteModalOpen = true">
             <UserPlus class="h-4 w-4 mr-2" />
             邀请成员
@@ -245,21 +250,28 @@
       </div>
 
       <!-- 文件管理模式 -->
-      <TeamFileManager v-else :team-id="team.id" :team-name="team.name" />
+      <TeamFileManager v-else ref="teamFileManagerRef" :team-id="team.id" :team-name="team.name" />
     </div>
 
     <!-- 邀请成员模态框 -->
     <InviteMemberModal v-model="isInviteModalOpen" width="900px" :team-id="currentTeamId" @success="handleInviteMember" />
+
+    <!-- 聊天窗口 -->
+    <FreeDialog v-model="isChatWindowOpen" title="交流中心" icon="lucide:message-square" :position="{ x: 100, y: 100 }" :size="{ width: 1200, height: 800 }">
+      <IM :team-id="currentTeamId" />
+    </FreeDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { ArrowLeft, BarChart3, FolderOpen, UserPlus, MoreVertical, Edit3, Settings, Share2, Users, Files, Activity, Star, Upload, FileText, MessageSquare, MoreHorizontal, Crown, Shield, User } from 'lucide-vue-next';
+import { ArrowLeft, BarChart3, FolderOpen, UserPlus, MoreVertical, Edit3, Settings, Share2, Users, Files, Activity, Star, Upload, FileText, MessageSquare, MoreHorizontal, Crown, Shield, User, MessageSquareMore } from 'lucide-vue-next';
 import type { LucideIcon } from 'lucide-vue-next';
 import TeamFileManager from './TeamFileManager.vue';
 import InviteMemberModal from '@/components/business/InviteMemberModal.vue';
+import FreeDialog from '@/components/freeDialog/index2.vue';
+import IM from '@/modules/IM/index.vue';
 
 const route = useRoute();
 const currentTeamId = computed(() => parseInt(route.params.id as string));
@@ -339,10 +351,12 @@ interface InviteData {
 const router = useRouter();
 
 // 响应式数据
-const viewMode = ref<ViewMode>('dashboard');
+const viewMode = ref<ViewMode>('files');
 const activeTab = ref<TabType>('overview');
 const isInviteModalOpen = ref(false);
 const showMoreMenu = ref(false);
+const teamFileManagerRef = ref<InstanceType<typeof TeamFileManager> | null>(null);
+const isChatWindowOpen = ref(false);
 
 // 模拟数据
 const team = ref<Team>({
@@ -505,6 +519,11 @@ const tabs = [
 const handleInviteMember = (data: InviteData): void => {
   console.log('Inviting members:', data);
   // isInviteModalOpen.value = false;
+};
+
+const openChatWindow = () => {
+  // teamFileManagerRef.value?.handleOpenChatWindow();
+  isChatWindowOpen.value = true;
 };
 
 const getStatBgClass = (color: StatColor): string => {

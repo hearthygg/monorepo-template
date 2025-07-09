@@ -57,6 +57,7 @@ const menuItems = [
     </nav>
     <div class="py-2 px-4" :class="isCollapsed ? 'text-center' : 'text-right'">
       <el-button type="text" @click="toggleCollapse">
+        <!-- 图标待替换 -->
         <Icon icon="fluent-emoji:right-arrow" class="w-5 h-5 transform transition-transform duration-300" :class="{ 'rotate-180': !isCollapsed }" />
       </el-button>
     </div>

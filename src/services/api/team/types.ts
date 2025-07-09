@@ -1,4 +1,4 @@
-import type { FilePermissionLevel } from '@/constants/enum';
+import type { ChatRoomType, FilePermissionLevel, OnlineStatusEnum } from '@/constants/enum';
 
 /**
  * 团队列表
@@ -186,4 +186,123 @@ export interface InvitationValidateResultDto {
    * 邀请权限
    */
   permission: FilePermissionLevel;
+}
+
+export interface CreateCustomChatRoomDto {
+  /**
+   * 聊天室描述
+   */
+  description?: string;
+  /**
+   * 聊天室名称
+   */
+  name: string;
+  /**
+   * 聊天室类型
+   */
+  type: ChatRoomType;
+}
+
+/**
+ * 检查是否有当前团队下创建自定义聊天室权限返回结果
+ */
+export interface CheckCreateRoomPermissionResultDto {
+  /**
+   * 是否可以创建聊天室
+   */
+  canCreate: boolean;
+  /**
+   * 当前聊天室数量
+   */
+  currentRooms: number;
+  /**
+   * 最大可创建聊天室数量
+   */
+  maxRooms: number;
+  /**
+   * 权限不足的原因
+   */
+  reason?: string;
+}
+
+/**
+ * 团队成员在线状态
+ */
+export interface TeamMembersOnlineStatusDto {
+  /**
+   * 成员列表
+   */
+  members: MemberOnlineStatusDto[];
+  /**
+   * 在线成员数
+   */
+  onlineMembers: number;
+  /**
+   * 团队ID
+   */
+  teamId: number;
+  /**
+   * 团队名称
+   */
+  teamName: string;
+  /**
+   * 总成员数
+   */
+  totalMembers: number;
+}
+
+/**
+ * 成员在线状态
+ */
+export interface MemberOnlineStatusDto {
+  /**
+   * 头像
+   */
+  avatar: string;
+  /**
+   * 邮箱
+   */
+  email: string;
+  /**
+   * 昵称
+   */
+  nickname: string;
+  /**
+   * 在线状态
+   */
+  onlineStatus: OnlineStatus;
+  /**
+   * 用户ID
+   */
+  userId: number;
+  /**
+   * 用户名
+   */
+  username: string;
+}
+
+/**
+ * 在线状态
+ */
+export interface OnlineStatus {
+  /**
+   * 当前聊天室ID
+   */
+  currentChatRoomId?: string;
+  /**
+   * 是否正在输入
+   */
+  isTyping: boolean;
+  /**
+   * 最后活动时间
+   */
+  lastActivityAt?: Date;
+  /**
+   * 最后在线时间
+   */
+  lastSeenAt?: Date;
+  /**
+   * 在线状态
+   */
+  status: OnlineStatusEnum;
 }

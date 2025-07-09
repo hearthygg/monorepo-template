@@ -11,19 +11,17 @@
       >
         <div class="header" @mousedown="startDrag($event)">
           <span class="title">
-            <svg class="myIcon mr-2" aria-hidden="true" style="font-size: 24px">
-              <use :xlink:href="icon ? `#${icon}` : '#icon-moren'"></use>
-            </svg>
+            <Icon v-if="icon" :icon="icon" class="h-6 w-6 mr-2" />
             {{ props.dialogTitle }}
           </span>
-          <span class="minimize-btn" @click="minimizeWindow">
-            <i class="iconfont icon-2zuixiaohua-2"></i>
+          <span class="minimize-btn" @click.stop="minimizeWindow">
+            <MinusIcon class="h-4 w-4" />
           </span>
           <span class="fullscreen-btn" @click="toggleFullscreen">
-            <i class="iconfont" style="font-weight: bold" :class="isFullscreen ? 'icon-zuidahua' : 'icon-3zuidahua-1'"></i>
+            <component :is="isFullscreen ? CopyIcon : SquareIcon" class="h-4 w-4" />
           </span>
           <span class="minimize-btn" @click="minimizeWindow">
-            <i class="iconfont icon-guanbi"></i>
+            <XIcon class="h-4 w-4" />
           </span>
         </div>
         <div class="content">
@@ -47,6 +45,8 @@
 
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue';
+import { MinusIcon, CopyIcon, SquareIcon, XIcon } from 'lucide-vue-next';
+import { Icon } from '@iconify/vue';
 const props = defineProps({
   // v-model 双向绑定的值
   modelValue: {
@@ -116,9 +116,9 @@ const zIndexState = reactive({
 });
 // 边界参数设置
 const startDrag = (event: MouseEvent) => {
-  const handle = event.target as HTMLElement;
-  // 限制只有可拖拽的元素会进调整大小判断
-  if (btnClass.includes(handle.className)) return;
+  // const handle = event.target as HTMLElement;
+  // // 限制只有可拖拽的元素会进调整大小判断
+  // if (btnClass.includes(handle.className)) return;
   // 全屏不要拖动和缩放
   if (isFullscreen.value) return;
   isDragging.value = true;
@@ -144,6 +144,7 @@ const endDrag = () => {
 };
 
 const minimizeWindow = () => {
+  console.log('minimizeWindow');
   isShow.value = !isShow.value;
   if (isShow.value) setViewIndex();
 };
@@ -317,7 +318,7 @@ const resetWindowState = () => {
   display: flex;
   flex-direction: column;
   height: calc(100% - 44px);
-  @include scrollBar;
+  //@include scrollBar;
 }
 
 .hidden {

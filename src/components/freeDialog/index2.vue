@@ -1,19 +1,19 @@
 <template>
-  <div ref="windowRef" class="resizable-window" :class="windowClasses" :style="windowStyles" @mousedown="handleWindowClick">
+  <div v-show="isShow" ref="windowRef" class="resizable-window" :class="windowClasses" :style="windowStyles" @mousedown="handleWindowClick">
     <!-- 窗口标题栏 -->
-    <div ref="titleBarRef" class="window-title-bar" @mousedown="startDrag" @dblclick="toggleMaximize">
+    <div class="window-title-bar" @mousedown="startDrag" @dblclick="toggleMaximize">
       <div class="window-title">
-        <Icon :icon="getIconNameByFile(window.data.ext || '')" class="h-5 w-5 mr-2" />
-        {{ window.data.name }}
+        <Icon v-if="icon" :icon="icon" class="h-5 w-5 mr-2 text-blue-500" />
+        {{ title }}
       </div>
       <div class="window-controls">
-        <button class="window-control-btn minimize" title="最小化" @click="$emit('minimize', window.id)">
+        <button class="window-control-btn minimize" title="最小化" @click="isShow = false">
           <MinusIcon class="h-4 w-4" />
         </button>
-        <button class="window-control-btn maximize" :title="window.status === 'maximized' ? '还原' : '最大化'" @click="toggleMaximize">
-          <component :is="window.status === 'maximized' ? CopyIcon : SquareIcon" class="h-4 w-4" />
+        <button class="window-control-btn maximize" :title="windowData.isFullscreen ? '还原' : '最大化'" @click="toggleMaximize">
+          <component :is="windowData.isFullscreen ? CopyIcon : SquareIcon" class="h-4 w-4" />
         </button>
-        <button class="window-control-btn close" title="关闭" @click="$emit('close', window.id)">
+        <button class="window-control-btn close" title="关闭" @click="isShow = false">
           <XIcon class="h-4 w-4" />
         </button>
       </div>
@@ -25,7 +25,7 @@
     </div>
 
     <!-- 调整大小手柄 -->
-    <div v-if="window.status === 'normal'" class="resize-handles">
+    <div v-if="!windowData.isFullscreen" class="resize-handles">
       <!-- 边缘手柄 -->
       <div class="resize-handle resize-n" @mousedown="startResize('n', $event)"></div>
       <div class="resize-handle resize-s" @mousedown="startResize('s', $event)"></div>
@@ -42,32 +42,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Minus as MinusIcon, X as XIcon, Square as SquareIcon, Copy as CopyIcon, FileText, Image, Video, Music, File } from 'lucide-vue-next';
-import type { WindowState } from '@/types/window';
-import { useWindowManager } from '@/composables/useWindowManager';
+import { ref, computed, onUnmounted, reactive } from 'vue';
+import { Minus as MinusIcon, X as XIcon, Square as SquareIcon, Copy as CopyIcon } from 'lucide-vue-next';
 import { Icon } from '@iconify/vue';
-import { getIconNameByFile } from '@/utils/file-icon-map';
-const { windowManager } = useWindowManager();
+
 interface Props {
-  window: WindowState;
+  title?: string;
+  icon?: string;
+  modelValue: boolean;
+  position?: { x: number; y: number };
+  size?: { width: number; height: number };
 }
 
-interface Emits {
-  (e: 'close', id: string): void;
-  (e: 'minimize', id: string): void;
-  (e: 'maximize', id: string): void;
-  (e: 'restore', id: string): void;
-  (e: 'focus', id: string): void;
-  (e: 'update-position', id: string, position: { x: number; y: number }): void;
-  (e: 'update-size', id: string, size: { width: number; height: number }): void;
-}
-
-const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const props = withDefaults(defineProps<Props>(), {
+  title: '',
+  icon: '',
+  modelValue: false,
+  position: () => ({ x: 100, y: 100 }),
+  size: () => ({ width: 800, height: 600 })
+});
+const emit = defineEmits(['update:modelValue']);
+const isShow = computed({
+  get: () => props.modelValue,
+  set: value => {
+    emit('update:modelValue', value);
+  }
+});
 
 const windowRef = ref<HTMLElement>();
-const titleBarRef = ref<HTMLElement>();
 
 // 拖拽状态
 const isDragging = ref(false);
@@ -75,18 +77,25 @@ const isResizing = ref(false);
 const resizeDirection = ref('');
 const dragStart = ref({ x: 0, y: 0, windowX: 0, windowY: 0 });
 const resizeStart = ref({ x: 0, y: 0, width: 0, height: 0, windowX: 0, windowY: 0 });
-
+const focusZindex = ref(1002);
+const normalZindex = ref(1000);
+const windowData = reactive({
+  position: props.position,
+  size: props.size,
+  isFullscreen: false,
+  zIndex: normalZindex.value
+});
 // 窗口样式
 const windowStyles = computed(() => {
-  const { position, size, status } = props.window;
+  const { position, size, isFullscreen } = windowData;
 
-  if (status === 'maximized') {
+  if (isFullscreen) {
     return {
       left: '0px',
       top: '0px',
       width: '100vw',
       height: '100vh',
-      zIndex: props.window.zIndex
+      zIndex: windowData.zIndex
     };
   }
 
@@ -95,54 +104,34 @@ const windowStyles = computed(() => {
     top: `${position.y}px`,
     width: `${size.width}px`,
     height: `${size.height}px`,
-    zIndex: props.window.zIndex
+    zIndex: windowData.zIndex
   };
 });
 
 // 窗口类名
-const windowClasses = computed(() => ['window', `window-${props.window.status}`, { 'window-focused': props.window.id === windowManager.activeWindowId }]);
-
-// 获取文件图标
-const getFileIcon = (type: string) => {
-  switch (type) {
-    case 'image':
-      return Image;
-    case 'video':
-      return Video;
-    case 'audio':
-      return Music;
-    case 'text':
-    case 'code':
-      return FileText;
-    default:
-      return File;
-  }
-};
+const windowClasses = computed(() => ['window', `window-${windowData.isFullscreen ? 'fullscreen' : 'normal'}`, { 'window-focused': isShow }]);
 
 // 处理窗口点击
 const handleWindowClick = () => {
-  emit('focus', props.window.id);
+  isShow.value = true;
 };
 
 // 切换最大化
 const toggleMaximize = () => {
-  if (props.window.status === 'maximized') {
-    emit('restore', props.window.id);
-  } else {
-    emit('maximize', props.window.id);
-  }
+  windowData.isFullscreen = !windowData.isFullscreen;
+  windowData.zIndex = windowData.isFullscreen ? focusZindex.value : normalZindex.value;
 };
 
 // 开始拖拽
 const startDrag = (e: MouseEvent) => {
-  if (props.window.status === 'maximized') return;
+  if (windowData.isFullscreen) return;
 
   isDragging.value = true;
   dragStart.value = {
     x: e.clientX,
     y: e.clientY,
-    windowX: props.window.position.x,
-    windowY: props.window.position.y
+    windowX: windowData.position.x,
+    windowY: windowData.position.y
   };
 
   document.addEventListener('mousemove', handleDrag);
@@ -157,10 +146,11 @@ const handleDrag = (e: MouseEvent) => {
   const deltaX = e.clientX - dragStart.value.x;
   const deltaY = e.clientY - dragStart.value.y;
 
-  const newX = Math.max(0, Math.min(window.innerWidth - props.window.size.width, dragStart.value.windowX + deltaX));
-  const newY = Math.max(0, Math.min(window.innerHeight - props.window.size.height, dragStart.value.windowY + deltaY));
+  const newX = Math.max(0, Math.min(window.innerWidth - windowData.size.width, dragStart.value.windowX + deltaX));
+  const newY = Math.max(0, Math.min(window.innerHeight - windowData.size.height, dragStart.value.windowY + deltaY));
 
-  emit('update-position', props.window.id, { x: newX, y: newY });
+  windowData.position.x = newX;
+  windowData.position.y = newY;
 };
 
 // 停止拖拽
@@ -178,10 +168,10 @@ const startResize = (direction: string, e: MouseEvent) => {
   resizeStart.value = {
     x: e.clientX,
     y: e.clientY,
-    width: props.window.size.width,
-    height: props.window.size.height,
-    windowX: props.window.position.x,
-    windowY: props.window.position.y
+    width: windowData.size.width,
+    height: windowData.size.height,
+    windowX: windowData.position.x,
+    windowY: windowData.position.y
   };
 
   document.addEventListener('mousemove', handleResize);
@@ -223,8 +213,10 @@ const handleResize = (e: MouseEvent) => {
   newX = Math.max(0, Math.min(window.innerWidth - newWidth, newX));
   newY = Math.max(0, Math.min(window.innerHeight - newHeight, newY));
 
-  emit('update-position', props.window.id, { x: newX, y: newY });
-  emit('update-size', props.window.id, { width: newWidth, height: newHeight });
+  windowData.position.x = newX;
+  windowData.position.y = newY;
+  windowData.size.width = newWidth;
+  windowData.size.height = newHeight;
 };
 
 // 停止调整大小
@@ -234,18 +226,6 @@ const stopResize = () => {
   document.removeEventListener('mousemove', handleResize);
   document.removeEventListener('mouseup', stopResize);
 };
-
-onMounted(() => {
-  // 确保窗口在屏幕内
-  if (windowRef.value) {
-    const rect = windowRef.value.getBoundingClientRect();
-    if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
-      const newX = Math.max(0, Math.min(window.innerWidth - props.window.size.width, props.window.position.x));
-      const newY = Math.max(0, Math.min(window.innerHeight - props.window.size.height, props.window.position.y));
-      emit('update-position', props.window.id, { x: newX, y: newY });
-    }
-  }
-});
 
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleDrag);

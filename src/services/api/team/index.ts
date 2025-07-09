@@ -1,6 +1,7 @@
 import type { AxiosPromise } from 'axios';
-import type { CreateTeamDto, InvitationValidateResultDto, InviteResultDto, SendJoinTeamInvitationDto, TeamListDto } from './types';
+import type { CheckCreateRoomPermissionResultDto, CreateCustomChatRoomDto, CreateTeamDto, InvitationValidateResultDto, InviteResultDto, SendJoinTeamInvitationDto, TeamListDto, TeamMembersOnlineStatusDto } from './types';
 import http from '../../http';
+import type { ChatRoomType } from '@/constants/enum';
 
 // 获取最近的团队
 export const getRecentTeamsApi = (): AxiosPromise<TeamListDto[]> => {
@@ -52,5 +53,44 @@ export const checkInvitationApi = (inviteCode: string): AxiosPromise<InvitationV
     params: {
       inviteCode
     }
+  });
+};
+
+// 创建团队默认聊天室
+export const createTeamDefaultChatRoomApi = (teamId: number) => {
+  return http({
+    url: `/teams/${teamId}/chat-room/default`,
+    method: 'post'
+  });
+};
+
+// 创建团队自定义聊天室
+export const createTeamCustomChatRoomApi = (teamId: number, data: CreateCustomChatRoomDto) => {
+  return http({
+    url: `/teams/${teamId}/chat-room`,
+    method: 'post',
+    data
+  });
+};
+
+// 检查是否有当前团队下创建自定义聊天室权限
+export const checkCreateRoomPermissionApi = (teamId: number, type: ChatRoomType): AxiosPromise<CheckCreateRoomPermissionResultDto> => {
+  return http({
+    url: `/teams/${teamId}/chat-room/check-permission`,
+    method: 'post',
+    data: {
+      type
+    }
+  });
+};
+
+// 获取团队下成员的在线状态
+export const getTeamMemberOnlineStatusApi = (teamId: number): AxiosPromise<TeamMembersOnlineStatusDto> => {
+  return http({
+    url: `/teams/${teamId}/members/online-status`,
+    params: {
+      id: teamId
+    },
+    method: 'get'
   });
 };

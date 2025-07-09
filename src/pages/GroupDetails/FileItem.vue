@@ -59,7 +59,7 @@
   </div>
 
   <!-- 网格模式 -->
-  <div v-else class="h-full group">
+  <div v-else class="h-full group" @contextmenu.prevent.stop="handleContextMenu">
     <div class="h-full cursor-pointer hover:shadow-md transition-all duration-300 bg-white rounded-lg border border-gray-200 relative">
       <!-- 选择框 -->
       <div class="absolute top-2 left-2 z-10">

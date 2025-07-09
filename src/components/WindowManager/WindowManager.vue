@@ -14,7 +14,7 @@
         @update-position="updateWindowPosition"
         @update-size="updateWindowSize"
       >
-        <FilePreviewWindow :file="window.data" />
+        <FilePreviewWindow :type="window.type" :file="window.data" />
       </ResizableWindow>
     </div>
 
@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+// import { computed } from 'vue';
 import { useWindowManager } from '@/composables/useWindowManager';
 import ResizableWindow from './ResizableWindow.vue';
 import FilePreviewWindow from './FilePreviewWindow.vue';
@@ -32,11 +32,11 @@ import TaskBar from './TaskBar.vue';
 
 const { windowManager, closeWindow, minimizeWindow, maximizeWindow, restoreWindow, focusWindow, updateWindowPosition, updateWindowSize, changeWindowStatus } = useWindowManager();
 
-// 可见窗口（非最小化）
-const visibleWindows = computed(() => windowManager.windows.filter(w => w.status !== 'minimized'));
+// // 可见窗口（非最小化）
+// const visibleWindows = computed(() => windowManager.windows.filter(w => w.status !== 'minimized'));
 
-// 最小化窗口
-const minimizedWindows = computed(() => windowManager.windows.filter(w => w.status === 'minimized'));
+// // 最小化窗口
+// const minimizedWindows = computed(() => windowManager.windows.filter(w => w.status === 'minimized'));
 </script>
 
 <style scoped>

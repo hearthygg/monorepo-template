@@ -2,7 +2,7 @@
   <el-dialog v-model="visible" class="custom-dialog" width="1050px" :close-on-click-modal="false" @closed="handleClose">
     <template #title>
       <div class="flex items-center gap-2">
-        <component :is="getFileIcon()" class="h-6 w-6" />
+        <Icon :icon="getIconNameByFile(file.ext || '')" class="h-6 w-6" />
         <span>{{ file.name }} - 权限设置</span>
       </div>
     </template>
@@ -49,6 +49,8 @@ import { getFilePermissionListApi, updateFilePermissionApi } from '@/services/ap
 import { File, Folder, FileText, FileSpreadsheet, FileCode, ImageIcon } from 'lucide-vue-next';
 import type { FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto } from '@/services/api/file/types';
 import { Check, X } from 'lucide-vue-next';
+import { getIconNameByFile } from '@/utils/file-icon-map';
+import { Icon } from '@iconify/vue';
 const props = defineProps<{
   modelValue: boolean;
   file: FileTreeDto;

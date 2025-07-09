@@ -5,7 +5,7 @@
       <!-- 头部 -->
       <div class="flex items-center justify-between p-4 border-b border-gray-200">
         <div class="flex items-center gap-3">
-          <component :is="getFileIcon()" class="h-8 w-8 text-blue-500" />
+          <Icon :icon="getIconNameByFile(fileInfo?.ext || '')" class="h-8 w-8 text-blue-500" />
           <div>
             <h2 class="text-xl font-semibold text-gray-900">文件属性</h2>
             <p class="text-sm text-gray-500">{{ fileInfo?.name }}</p>
@@ -146,6 +146,8 @@ import { getFileInfoApi } from '@/services/api/file';
 import type { FileInfoDto } from '@/services/api/file/types';
 import { ElMessage } from 'element-plus';
 import { formatFileSize, formatDate } from '@/utils/file';
+import { getIconNameByFile } from '@/utils/file-icon-map';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps<{
   modelValue: boolean;

@@ -24,7 +24,7 @@
     <!-- 右侧文件列表 -->
     <div class="flex-1 flex flex-col">
       <!-- 工具栏 -->
-      <div class="p-3 border-b border-gray-200 space-y-3">
+      <div class="p-3 space-y-3">
         <!-- 操作栏 -->
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2">
@@ -70,7 +70,7 @@
       </div>
 
       <!-- 文件列表内容 -->
-      <div class="flex-1 overflow-y-auto p-4">
+      <div class="flex-1 overflow-y-auto px-4 pb-2">
         <!-- 面包屑导航 -->
         <BreadcrumbNav :is-trigger="true" :items="breadcrumbItems" @navigate="selectFolder" />
         <div v-if="currentContent.length === 0" class="text-center py-12">
@@ -151,7 +151,7 @@ import WindowManager from '@/components/WindowManager/WindowManager.vue';
 import { useWindowManager } from '@/composables/useWindowManager';
 import { formatFileSize } from '@/utils/file';
 
-const { openFilePreview } = useWindowManager();
+const { openFileWindow } = useWindowManager();
 
 // 类型定义
 type ViewMode = 'list' | 'grid';
@@ -192,7 +192,8 @@ const fileTree = ref<FileTreeDto[]>([
     },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    children: []
+    children: [],
+    isEditable: false
   }
 ]);
 
@@ -277,7 +278,6 @@ const handleFileClick = (item: FileTreeDto): void => {
 const handleFileContextMenu = (item: FileTreeDto, e: MouseEvent, type: string): void => {
   showContextMenu(e, item, item.permission);
   currentContextMenuType.value = type;
-  console.log(e.clientX, e.clientY);
 };
 
 const handleFileUploadSuccess = async (): Promise<void> => {
@@ -310,10 +310,11 @@ const handleContextMenuAction = async (action: string, file: FileTreeDto) => {
   switch (action) {
     case 'open':
       console.log('打开文件/文件夹');
+      handleFileClick(file);
       break;
     case 'preview':
       console.log('预览文件');
-      openFilePreview(file);
+      openFileWindow(file, 'view');
       break;
     case 'download':
       console.log('下载文件');
@@ -335,6 +336,7 @@ const handleContextMenuAction = async (action: string, file: FileTreeDto) => {
       console.log('剪切文件');
       break;
     case 'createFolder':
+      // 创建文件夹
       openCreateFolderModal(file.id);
       break;
     case 'uploadFile':
@@ -367,11 +369,51 @@ const handleContextMenuAction = async (action: string, file: FileTreeDto) => {
       console.log('更新权限');
       isUpdatePermissionModalOpen.value = true;
       break;
+    case 'edit':
+      if (file.isEditable) {
+        openFileWindow(file, 'edit');
+      } else {
+        // ElMessage.warning('文件不可编辑');
+        // 弹出替换远程文件的窗口功能
+      }
+      break;
     default:
       console.log(`未知操作: ${action}`);
   }
 
   hideContextMenu();
+};
+
+const handleOpenChatWindow = (): void => {
+  openFileWindow(
+    {
+      id: -1,
+      name: '交流中心',
+      isFolder: false,
+      isOwner: true,
+      permission: FilePermissionLevel.VIEW,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      children: [],
+      isEditable: false,
+      owner: {
+        id: 0,
+        nickname: '系统'
+      },
+      ext: 'chat'
+    },
+    'view',
+    {
+      position: {
+        x: 50,
+        y: 50
+      },
+      size: {
+        width: 1200,
+        height: 800
+      }
+    }
+  );
 };
 
 const handleStartRename = (id: number): void => {
@@ -574,6 +616,10 @@ const handleBulkDownload = async () => {
     ElMessage.error('批量下载失败，请稍后重试');
   }
 };
+
+defineExpose({
+  handleOpenChatWindow
+});
 
 onBeforeMount(() => {
   getFileTree();

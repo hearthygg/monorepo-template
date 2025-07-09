@@ -1,7 +1,7 @@
 <template>
   <div class="pdf-preview-container h-full flex bg-gray-200 relative">
     <!-- 缩略图侧边栏 -->
-    <aside class="thumbnail-sidebar bg-gray-800 text-white flex-shrink-0 overflow-y-auto transition-all duration-300 absolute lg:relative z-10 h-full" :class="isSidebarOpen ? 'w-48' : 'w-0'">
+    <aside class="thumbnail-sidebar bg-gray-600 text-white flex-shrink-0 overflow-y-auto transition-all duration-300 absolute lg:relative z-10 h-full" :class="isSidebarOpen ? 'w-48' : 'w-0'">
       <div class="p-2 space-y-2">
         <div
           v-for="pageNumber in pdfInfo.pageCount"

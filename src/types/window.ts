@@ -1,7 +1,7 @@
 export interface WindowState {
   id: string;
   title: string;
-  type: 'file-preview' | 'folder' | 'settings';
+  type: 'view' | 'edit';
   status: 'normal' | 'maximized' | 'minimized';
   position: { x: number; y: number };
   size: { width: number; height: number };

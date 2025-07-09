@@ -1,5 +1,5 @@
 <template>
-  <div v-if="minimizedWindows.length > 0" ref="taskBarRef" class="task-bar">
+  <div v-if="minimizedWindows.length > 0" ref="taskBarRef" class="task-bar bg-gray-100">
     <div class="task-bar-content">
       <div class="task-items">
         <el-tooltip v-for="window in minimizedWindows" :key="window.id" :content="window.data.name" placement="top"
@@ -60,14 +60,14 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translateX(-50%);
   height: auto;
-  background: rgba(229, 231, 235, 0.6); /* Light grey glass */
+  // background: rgba(229, 231, 235, 0.6); /* Light grey glass */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px); /* Safari support */
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 18px;
   z-index: 200;
   pointer-events: auto;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease-in-out;
   max-width: 80vw; /* 建议使用 vw 以适应不同屏幕 */
   padding: 6px;
@@ -93,8 +93,8 @@ onBeforeUnmount(() => {
 .task-items {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
-  height: 56px;
+  gap: 4px;
+  height: 45px;
   padding: 0 4px;
 }
 
@@ -106,8 +106,8 @@ onBeforeUnmount(() => {
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  width: 56px;
-  height: 56px;
+  width: 45px;
+  height: 45px;
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1); /* Bouncy transition */
 }
 
