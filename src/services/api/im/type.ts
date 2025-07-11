@@ -22,6 +22,10 @@ export interface ChatRoomResponseDto {
    */
   lastMessage?: ChatRoomBaseMessage;
   /**
+   * 私聊成员信息（仅私聊时返回）
+   */
+  members?: ChatMemberResponseDto[];
+  /**
    * 最后读取时间
    */
   lastReadAt?: Date;
@@ -56,6 +60,10 @@ export interface ChatRoomQueryDto {
    * 是否有未读消息
    */
   hasUnread?: boolean;
+  /**
+   * 是否包含私聊成员信息（会影响性能，仅在需要时使用）
+   */
+  includeMembers?: boolean;
   /**
    * 是否静音
    */
@@ -102,6 +110,10 @@ export interface ChatRoomBaseMessage {
    * 发送者名称
    */
   senderName: string;
+  /**
+   * 创建时间
+   */
+  createdAt: string;
 }
 
 /**

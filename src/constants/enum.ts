@@ -63,3 +63,16 @@ export enum OnlineStatusEnum {
   /** 忙碌 */
   BUSY = 'busy'
 }
+
+export enum UploadScene {
+  /** 聊天图片 */
+  CHAT_IMAGE = 'chat_image',
+  /** 用户头像 */
+  USER_AVATAR = 'user_avatar',
+  /** 团队logo */
+  TEAM_LOGO = 'team_logo',
+  /** 文档文件 */
+  DOCUMENT = 'document',
+  /** 通用文件 */
+  GENERAL = 'general'
+}

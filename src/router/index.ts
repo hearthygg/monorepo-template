@@ -63,6 +63,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     component: () => import('@/pages/invite/Operate.vue'),
     meta: { hidden: true, public: true } // 可选，表示无需登录即可访问
   },
+  // 测试
+  {
+    path: '/test',
+    component: () => import('@/components/common/DropdownDemo.vue'),
+    meta: { hidden: true }
+  },
   // 404 页面路由
   {
     path: '/:pathMatch(.*)*',

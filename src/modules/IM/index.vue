@@ -3,24 +3,35 @@
     <!-- 左侧会话列表 -->
     <div class="im-sidebar">
       <div class="sidebar-header">
-        <div class="search-box">
+        <div class="search-box flex items-center gap-2">
           <input v-model="searchKeyword" type="text" placeholder="搜索联系人..." class="search-input" />
+          <!-- 创建聊天室 -->
+          <div class="p-2 bg-gray-100 rounded-md cursor-pointer" @click="openCreateCustomChatRoomDialog">
+            <Plus class="text-gray-700 hover:text-blue-700" />
+          </div>
         </div>
       </div>
       <div class="user-list">
         <template v-if="chatRoomList.length">
           <div v-for="conv in chatRoomList" :key="conv.id" :class="['user-item', { active: currentChatRoomId === conv.id }]" @click="selectConversation(conv)">
             <div class="user-avatar">
-              <Avatar :name="conv.name" :is-group="conv.type === 'group'" size="md" />
+              <Avatar :name="getPrivateChatDisplayName(conv)" :is-group="conv.type === 'group'" size="md" />
             </div>
             <div class="user-info">
-              <div class="user-name">{{ conv.name }}</div>
+              <div class="user-name">
+                <template v-if="conv.type === 'group'">
+                  {{ conv.name }}
+                </template>
+                <template v-else>
+                  {{ getPrivateChatDisplayName(conv) }}
+                </template>
+                <span class="text-xs text-gray-500">{{ formatChatTime(conv.lastMessage?.createdAt as string) }}</span>
+              </div>
               <div class="user-status">
-                <template v-if="conv.type === 'group'">群聊</template>
-                <!-- <template v-else>{{ getUserById(conv.members.find(id => id !== currentUserId)!)?.isOnline ? '在线' : '离线' }}</template> -->
+                <span>{{ getMessagePreview(conv.lastMessage?.content) }}</span>
               </div>
             </div>
-            <!-- <div v-if="conv.unreadCount > 0" class="unread-badge">{{ conv.unreadCount }}</div> -->
+            <div v-if="conv.unreadCount && conv.unreadCount > 0" class="unread-badge">{{ conv.unreadCount }}</div>
           </div>
         </template>
         <template v-else>
@@ -39,12 +50,12 @@
           <!-- 聊天头部 -->
           <div class="chat-header chat-header-card">
             <div class="chat-user-info">
-              <Avatar :name="currentChatRoomInfo?.name" :is-group="currentChatRoomInfo?.type === 'group'" size="md" class="chat-avatar" />
+              <Avatar :name="getChatDisplayName(currentChatRoomInfo)" :is-group="currentChatRoomInfo?.type === 'group'" size="md" class="chat-avatar" />
               <div>
-                <div class="chat-user-name">{{ currentChatRoomInfo?.name }}</div>
+                <div class="chat-user-name">{{ getChatDisplayName(currentChatRoomInfo) }}</div>
                 <div class="chat-user-status">
                   <template v-if="currentChatRoomInfo?.type === 'group'">群聊</template>
-                  <!-- <template v-else>{{ getUserById(currentConversation.members.find(id => id !== currentUserId)!)?.isOnline ? '在线' : '离线' }}</template> -->
+                  <template v-else>私聊</template>
                 </div>
               </div>
             </div>
@@ -62,15 +73,13 @@
               </div>
               <div :class="['message-item', { 'message-mine': msg.senderId === currentUserId }]">
                 <div class="message-avatar">
-                  <Avatar :name="msg.senderNickname" size="sm" />
+                  <Avatar :name="msg.senderNickname" />
                 </div>
                 <div class="message-content">
                   <div class="message-bubble-outer">
+                    <span class="group-sender">{{ msg.senderNickname }}</span>
                     <div class="message-bubble">
                       <div class="message-text">
-                        <template v-if="currentChatRoomInfo?.type === 'group' && msg.senderId !== currentUserId">
-                          <span class="group-sender">{{ msg.senderNickname }}：</span>
-                        </template>
                         <div v-html="msg.content"></div>
                       </div>
                     </div>
@@ -96,41 +105,45 @@
       <div v-if="currentChatRoomInfo?.type === 'group' && currentChatRoomInfo?.members.length" class="group-member-panel-flex">
         <div class="group-member-title flex justify-between items-center">
           <div>群成员（{{ currentChatRoomInfo?.members.length }}）</div>
-          <el-dropdown @command="handleMenuCommand">
-            <div class="px-2 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center">
-              <MoreHorizontal class="h-5 w-5" />
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item command="add">
-                  <div class="flex items-center text-gray-900 text-base">
-                    <Plus class="h-5 w-5 mr-2 text-blue-500" />
-                    添加成员
-                  </div>
-                </el-dropdown-item>
-                <el-dropdown-item command="delete" divided>
-                  <div class="flex items-center text-gray-900 text-base">
-                    <Trash2 class="h-5 w-5 mr-2 text-red-500" />
-                    删除会话
-                  </div>
-                </el-dropdown-item>
-              </el-dropdown-menu>
+          <Dropdown @select="handleMenuCommand">
+            <template #trigger>
+              <div class="px-2 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center transition-colors">
+                <MoreHorizontal class="h-5 w-5 text-gray-600" />
+              </div>
             </template>
-          </el-dropdown>
+            <DropdownItem value="add" :icon="Plus"> 添加成员 </DropdownItem>
+            <DropdownItem divider />
+            <DropdownItem value="exit" :icon="LogOut" danger> 退出群聊 </DropdownItem>
+            <DropdownItem value="delete" :icon="Trash2" danger> 删除会话 </DropdownItem>
+          </Dropdown>
         </div>
         <div class="group-member-list">
-          <div v-for="member in currentChatRoomInfo?.members" :key="member?.id" class="group-member-item">
-            <Avatar v-if="member" :name="member.user?.nickname" size="sm" class="group-member-avatar" />
-            <div v-if="member" class="group-member-info">
-              <div class="group-member-name">{{ member.user?.nickname }}</div>
-              <div class="group-member-status">{{ getUserOnlineStatus(member.userId) === OnlineStatusEnum.ONLINE ? '在线' : '离线' }}</div>
-            </div>
-          </div>
+          <template v-for="member in currentChatRoomInfo?.members" :key="member?.id">
+            <Dropdown trigger="click-contextmenu" class="w-full" @select="handleMemberMenuCommand($event, member.userId)">
+              <template #trigger>
+                <div class="group-member-item">
+                  <Avatar v-if="member" :show-online-status="true" :is-online="getUserOnlineStatus(member.userId) === OnlineStatusEnum.ONLINE" :name="member.user?.nickname" size="sm" class="group-member-avatar" />
+                  <div v-if="member" class="group-member-info">
+                    <div class="group-member-name">
+                      {{ member.user?.nickname }}
+                      <component :is="getRoleIcon(member.role)" v-if="getRoleIcon(member.role)" :class="['inline-block ml-1 w-3 h-3', getRoleIconColor(member.role)]" />
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <DropdownItem value="mention"> <span class="text-[16px]"> @ </span> <span class="ml-1">TA</span> </DropdownItem>
+              <DropdownItem value="sendMessage" :icon="MessageSquareMore"> 发送消息 </DropdownItem>
+              <DropdownItem divider />
+              <DropdownItem value="remove" :icon="Trash2" danger> 移出本群 </DropdownItem>
+            </Dropdown>
+          </template>
         </div>
       </div>
     </div>
-    <!-- 添加成员 -->
+    <!-- 添加成员弹窗 -->
     <InviteMember v-model:visible="inviteDialogVisible" :members="inviteMembers" :max="5" @confirm="handleInvite" />
+    <!-- 创建聊天室弹窗 -->
+    <CreateChatRoom v-model:visible="createChatRoomDialogVisible" @confirm="handleCreateChatRoom" />
   </div>
 </template>
 
@@ -138,29 +151,67 @@
 import { ref, computed, nextTick, onMounted, watch } from 'vue';
 import { useChat } from './composables/useChat';
 import type { ChatRoomResponseDto } from '@/services/api/im/type';
-import { Plus, MessageSquareMore, MoreHorizontal, Trash2 } from 'lucide-vue-next';
+import { Plus, MessageSquareMore, MoreHorizontal, Trash2, Search, Crown, Shield, LogOut } from 'lucide-vue-next';
 import Avatar from '@/components/common/Avatar.vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { debounce } from '@/utils/common';
 import ChatRichInput from './components/ChatRichInput.vue';
 import { formatChatTime, shouldShowTime } from '@/utils/date';
 import InviteMember from './components/InviteMember.vue';
+import CreateChatRoom from './components/CreateChatRoom.vue';
 import { batchAddChatRoomMembersApi } from '@/services/api/im';
-import { OnlineStatusEnum } from '@/constants/enum';
-
+import { OnlineStatusEnum, ChatMemberRole } from '@/constants/enum';
+import Dropdown from '@/components/common/Dropdown.vue';
+import DropdownItem from '@/components/common/DropdownItem.vue';
+import type { ChatRoomDetailResponseDto } from '@/services/api/im/type';
 const props = defineProps<{ teamId?: number }>();
-const { chatRoomList, currentChatRoomId, currentChatRoomInfo, currentUserId, chatRoomMessages, teamMemberOnlineStatus, joinRoom, getChatRoomMessages, createTeamDefaultChatRoom, sendMessage, getChatRoomInfo } = useChat(props.teamId);
+const {
+  chatRoomList,
+  currentChatRoomId,
+  currentChatRoomInfo,
+  currentUserId,
+  chatRoomMessages,
+  teamMemberOnlineStatus,
+  joinRoom,
+  getChatRoomMessages,
+  createTeamDefaultChatRoom,
+  sendMessage,
+  getChatRoomInfo,
+  shouldScrollToBottom,
+  resetScrollToBottom,
+  createPrivateChatRoom,
+  createCustomChatRoom,
+  getChatRoomList,
+  removeChatRoomMember,
+  exitChatRoom,
+  deleteChatRoom
+} = useChat(props.teamId);
 
 const inviteDialogVisible = ref(false);
 const inviteMembers = computed(() => teamMemberOnlineStatus.value.filter(member => !currentChatRoomInfo.value?.members.find(m => m.userId === member.id)));
+
+const createChatRoomDialogVisible = ref(false);
 
 const messageList = ref<HTMLElement>();
 const messageInput = ref<HTMLTextAreaElement>();
 const searchKeyword = ref('');
 
+// 监听是否需要滚动到底部
+watch(shouldScrollToBottom, newValue => {
+  if (newValue) {
+    nextTick(() => {
+      scrollToBottomDirect();
+      resetScrollToBottom();
+    });
+  }
+});
+
 // 选择会话
 const selectConversation = async (conv: ChatRoomResponseDto) => {
   await joinRoom(conv.id);
+  nextTick(() => {
+    scrollToBottomDirect();
+  });
 };
 
 const handlerSendMessage = (html: string) => {
@@ -173,13 +224,65 @@ const handlerSendMessage = (html: string) => {
   const hasImg = /<img\s/i.test(html);
   if (text || hasImg) {
     sendMessage(html);
+    // 发送消息后使用简单可靠的滚动方法
+    nextTick(() => {
+      scrollToBottomDirect();
+    });
   }
 };
 
-const scrollToBottom = () => {
-  if (messageList.value) {
-    messageList.value.scrollTop = messageList.value.scrollHeight;
-  }
+// 直接滚动到底部的方法
+const scrollToBottomDirect = () => {
+  if (!messageList.value) return;
+
+  // 方法1：直接设置scrollTop
+  messageList.value.scrollTop = messageList.value.scrollHeight;
+
+  // 方法2：使用scrollIntoView（备用方案）
+  setTimeout(() => {
+    const lastMessage = messageList.value?.lastElementChild;
+    if (lastMessage) {
+      console.log('使用scrollIntoView滚动到最后一条消息');
+      lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, 50);
+};
+
+// 更可靠的滚动到底部方法，监听DOM变化
+const scrollToBottomWithObserver = () => {
+  if (!messageList.value) return;
+
+  console.log('开始滚动到底部');
+  console.log('当前scrollTop:', messageList.value.scrollTop);
+  console.log('当前scrollHeight:', messageList.value.scrollHeight);
+  console.log('当前clientHeight:', messageList.value.clientHeight);
+
+  // 先立即滚动一次
+  messageList.value.scrollTop = messageList.value.scrollHeight;
+
+  console.log('滚动后scrollTop:', messageList.value.scrollTop);
+
+  // 使用MutationObserver监听DOM变化
+  const observer = new MutationObserver(() => {
+    console.log('DOM变化，重新滚动');
+    console.log('变化后scrollHeight:', messageList.value!.scrollHeight);
+    // DOM变化后重新滚动到底部
+    messageList.value!.scrollTop = messageList.value!.scrollHeight;
+  });
+
+  // 监听子节点变化
+  observer.observe(messageList.value, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['src', 'style', 'class']
+  });
+
+  // 3秒后停止监听（防止无限监听）
+  setTimeout(() => {
+    observer.disconnect();
+    console.log('停止监听DOM变化');
+  }, 3000);
 };
 
 const adjustTextareaHeight = () => {
@@ -201,16 +304,143 @@ const handleInvite = async (memberIds: number[]) => {
   }
 };
 
+const handleCreateChatRoom = async (name: string) => {
+  if (props.teamId) {
+    await createCustomChatRoom(name);
+    ElMessage.success('创建聊天室成功');
+    // 重新获取聊天室列表
+    await getChatRoomList();
+    createChatRoomDialogVisible.value = false;
+  }
+};
+
+const openCreateCustomChatRoomDialog = () => {
+  createChatRoomDialogVisible.value = true;
+};
+
 const getUserOnlineStatus = (userId: number) => {
   return teamMemberOnlineStatus.value.find(m => m.id === userId)?.onlineStatus;
+};
+
+// 获取角色图标组件
+const getRoleIcon = (role: ChatMemberRole) => {
+  switch (role) {
+    case ChatMemberRole.OWNER:
+      return Shield;
+    case ChatMemberRole.ADMIN:
+      return Crown;
+    default:
+      return null;
+  }
+};
+
+// 获取角色图标颜色
+const getRoleIconColor = (role: ChatMemberRole) => {
+  switch (role) {
+    case ChatMemberRole.OWNER:
+      return 'text-blue-500';
+    case ChatMemberRole.ADMIN:
+      return 'text-yellow-500';
+    default:
+      return '';
+  }
+};
+
+// 获取私聊显示名称（对面用户的昵称）
+const getPrivateChatDisplayName = (conv: ChatRoomResponseDto) => {
+  if (conv.type === 'group') {
+    return conv.name;
+  }
+
+  // 私聊：找到对面用户的昵称
+  if (conv.members && currentUserId.value) {
+    const otherMember = conv.members.find(member => member.userId !== currentUserId.value);
+    return otherMember?.user?.nickname || '未知用户';
+  }
+
+  return conv.name; // 兜底返回聊天室名称
+};
+
+const getChatDisplayName = (chatRoomInfo?: ChatRoomDetailResponseDto | null) => {
+  if (!chatRoomInfo) {
+    return '未知聊天室';
+  }
+  if (chatRoomInfo.type === 'group') {
+    return chatRoomInfo.name;
+  }
+  if (chatRoomInfo.members && currentUserId.value) {
+    const otherMember = chatRoomInfo.members.find(member => member.userId !== currentUserId.value);
+    return otherMember?.user?.nickname || '未知用户';
+  }
+  return chatRoomInfo.name;
+};
+
+// 获取消息预览内容
+const getMessagePreview = (content?: string) => {
+  if (!content) {
+    return '';
+  }
+
+  // 检查是否包含图片
+  if (/<img\s/i.test(content)) {
+    return '[图片]';
+  }
+
+  // 去除HTML标签，获取纯文本
+  const plainText = content
+    .replace(/<[^>]+>/g, '') // 去除所有HTML标签
+    .replace(/&nbsp;/g, ' ') // 替换&nbsp;为空格
+    .replace(/&amp;/g, '&') // 替换&amp;为&
+    .replace(/&lt;/g, '<') // 替换&lt;为<
+    .replace(/&gt;/g, '>') // 替换&gt;为>
+    .replace(/&quot;/g, '"') // 替换&quot;为"
+    .trim();
+
+  // 限制长度，超出部分用省略号
+  const maxLength = 30;
+  if (plainText.length > maxLength) {
+    return plainText.substring(0, maxLength) + '...';
+  }
+
+  return plainText;
 };
 
 const handleMenuCommand = (command: string) => {
   if (command === 'add') {
     inviteDialogVisible.value = true;
+  } else if (command === 'exit') {
+    ElMessageBox.confirm('确定退出群聊吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      exitChatRoom();
+    });
   } else if (command === 'delete') {
-    // 你的删除会话逻辑
-    ElMessage.warning('删除会话');
+    ElMessageBox.confirm('确定删除群聊吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      deleteChatRoom();
+    });
+  }
+};
+
+const handleMemberMenuCommand = (command: string, userId: number) => {
+  if (command === 'mention') {
+    ElMessage.warning('@ TA');
+  } else if (command === 'sendMessage') {
+    // 私聊消息
+    createPrivateChatRoom(userId);
+  } else if (command === 'remove') {
+    ElMessageBox.confirm('确定移出该成员吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      removeChatRoomMember(userId);
+    });
   }
 };
 
@@ -346,10 +576,17 @@ const onMessageListScroll = (e: Event) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .user-status {
-  font-size: 12px;
+  font-size: 13px;
   color: #8a99b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 .unread-badge {
   background-color: #ff4757;
@@ -362,8 +599,8 @@ const onMessageListScroll = (e: Event) => {
   text-align: center;
   position: absolute;
   right: 18px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 80%;
+  transform: translateY(-80%);
   box-shadow: 0 1px 4px 0 rgba(255, 71, 87, 0.15);
 }
 
@@ -446,8 +683,9 @@ const onMessageListScroll = (e: Event) => {
   padding: 32px 32px 24px 32px;
   flex: 1;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  /* 确保容器有正确的高度 */
+  min-height: 0;
+  /* 移除 flex-direction: column，避免滚动计算错误 */
   border-bottom: 1px solid #f2f6fc;
 }
 .message-item {
@@ -460,8 +698,8 @@ const onMessageListScroll = (e: Event) => {
   flex-direction: row-reverse;
 }
 .message-avatar {
-  margin: 0 10px 0 10px;
-  align-self: flex-end;
+  margin: 0 5px 0 5px;
+  /* align-self: flex-start; */
 }
 .message-avatar img {
   width: 36px;
@@ -489,12 +727,11 @@ const onMessageListScroll = (e: Event) => {
 }
 .message-bubble {
   background: #f8f9fa;
-  border-radius: 18px 18px 18px 6px;
+  border-radius: 6px 6px 6px 12px;
   box-shadow: 0 2px 8px rgba(80, 120, 200, 0.08);
-  padding: 14px 22px;
+  padding: 7px 11px;
   font-size: 15px;
   color: #2d3a4a;
-  margin-bottom: 4px;
   position: relative;
   word-break: break-word;
   transition: background 0.2s;
@@ -685,6 +922,7 @@ const onMessageListScroll = (e: Event) => {
   color: #2d3a4a;
   padding: 18px 18px 10px 18px;
   border-left: 1px solid #f2f6fc;
+  border-bottom: 1px solid #f2f6fc;
 }
 .group-member-list {
   flex: 1;
@@ -694,6 +932,7 @@ const onMessageListScroll = (e: Event) => {
   display: flex;
   align-items: center;
   padding: 10px 18px;
+  width: 100%;
   border-bottom: 1px solid #f7f8fa;
 }
 .group-member-avatar {

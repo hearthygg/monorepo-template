@@ -41,3 +41,31 @@ export const batchAddChatRoomMembersApi = (roomId: string, userIds: number[]) =>
     }
   });
 };
+
+// 创建私聊
+export const createPrivateChatRoomApi = (userId1: number, userId2: number): AxiosPromise<ChatRoomResponseDto> => {
+  return http({
+    url: `/chat/private`,
+    method: 'post',
+    data: {
+      userId1: userId1,
+      userId2: userId2
+    }
+  });
+};
+
+// 移除聊天室成员
+export const removeChatRoomMemberApi = (roomId: string, userId: number) => {
+  return http({
+    url: `/chat/room/${roomId}/member/${userId}`,
+    method: 'delete'
+  });
+};
+
+// 删除聊天室
+export const deleteChatRoomApi = (roomId: string) => {
+  return http({
+    url: `/chat/room/${roomId}`,
+    method: 'delete'
+  });
+};

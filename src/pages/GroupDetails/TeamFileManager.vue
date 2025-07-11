@@ -3,20 +3,32 @@
     <!-- 左侧文件树 -->
     <div class="w-64 border-r border-gray-200 flex flex-col">
       <div class="flex-1 overflow-y-auto p-2">
-        <div v-for="node in fileTree" :key="node.id">
-          <TreeNode
-            :node="node"
-            :level="0"
-            :expanded-folders="expandedFolders"
-            :selected-folder="selectedFolder"
-            :renaming-id="renamingId"
-            @contextmenu="handleFileContextMenu"
-            @toggle="toggleFolder"
-            @select="selectFolder"
-            @start-rename="handleStartRename"
-            @finish-rename="handleFinishRename"
-            @cancel-rename="handleCancelRename"
-          />
+        <!-- 加载状态 -->
+        <div v-if="isLoading" class="space-y-2 opacity-100 transition-opacity duration-300">
+          <div v-for="i in 5" :key="i" class="animate-pulse">
+            <div class="flex items-center space-x-2">
+              <div class="w-4 h-4 bg-gray-200 rounded"></div>
+              <div class="h-4 bg-gray-200 rounded flex-1"></div>
+            </div>
+          </div>
+        </div>
+        <!-- 文件树内容 -->
+        <div v-else-if="showContent" class="opacity-100 transition-opacity duration-300">
+          <div v-for="node in fileTree" :key="node.id">
+            <TreeNode
+              :node="node"
+              :level="0"
+              :expanded-folders="expandedFolders"
+              :selected-folder="selectedFolder"
+              :renaming-id="renamingId"
+              @contextmenu="handleFileContextMenu"
+              @toggle="toggleFolder"
+              @select="selectFolder"
+              @start-rename="handleStartRename"
+              @finish-rename="handleFinishRename"
+              @cancel-rename="handleCancelRename"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -24,88 +36,85 @@
     <!-- 右侧文件列表 -->
     <div class="flex-1 flex flex-col">
       <!-- 工具栏 -->
-      <div class="p-3 space-y-3">
-        <!-- 操作栏 -->
+      <div class="border-b border-gray-200 p-4">
         <div class="flex items-center justify-between">
+          <!-- 面包屑导航 -->
+          <BreadcrumbNav :items="breadcrumbItems" :is-trigger="true" @navigate="selectFolder" />
+
+          <!-- 右侧工具栏 -->
           <div class="flex items-center space-x-2">
+            <!-- 搜索框 -->
             <div class="relative">
-              <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <input v-model="searchQuery" placeholder="搜索文件..." class="pl-10 w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-2">
-            <div v-if="selectedFiles.size > 0" class="flex items-center space-x-2 mr-4">
-              <span class="text-sm text-gray-600">已选择 {{ selectedFiles.size }} 项</span>
-              <button class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center" @click="handleBulkDownload">
-                <Download class="h-4 w-4 mr-1" />
-                下载
-              </button>
-              <button class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 text-red-600 flex items-center">
-                <Trash2 class="h-4 w-4 mr-1" />
-                删除
-              </button>
+              <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input v-model="searchQuery" type="text" placeholder="搜索文件..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
             </div>
 
-            <div class="flex border border-gray-200 rounded-md">
-              <button :class="['px-3 py-2 text-sm rounded-l-md', viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50']" @click="viewMode = 'list'">
+            <!-- 视图切换按钮 -->
+            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+              <button :class="['p-2 rounded-md transition-all', viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900']" @click="viewMode = 'list'">
                 <List class="h-4 w-4" />
               </button>
-              <button :class="['px-3 py-2 text-sm rounded-r-md border-l', viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50']" @click="viewMode = 'grid'">
+              <button :class="['p-2 rounded-md transition-all', viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900']" @click="viewMode = 'grid'">
                 <Grid class="h-4 w-4" />
               </button>
             </div>
 
-            <button class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center" @click="openCreateFolderModal()">
-              <FolderPlus class="h-4 w-4 mr-2" />
-              新建文件夹
-            </button>
-
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm flex items-center" @click="openUploadModal()">
-              <Upload class="h-4 w-4 mr-2" />
-              上传文件
-            </button>
+            <!-- 操作按钮 -->
+            <div class="flex items-center space-x-2">
+              <button v-if="selectedFiles.size > 0" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium flex items-center transition-colors" @click="handleBulkDownload">
+                <Download class="h-4 w-4 mr-2" />
+                下载 ({{ selectedFiles.size }})
+              </button>
+              <button v-if="selectedFiles.size > 0" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium flex items-center transition-colors" @click="handleBulkDelete">
+                <Trash2 class="h-4 w-4 mr-2" />
+                删除 ({{ selectedFiles.size }})
+              </button>
+              <button class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium flex items-center transition-colors" @click="() => openCreateFolderModal()">
+                <FolderPlus class="h-4 w-4 mr-2" />
+                新建文件夹
+              </button>
+              <button class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium flex items-center transition-colors" @click="() => openUploadModal()">
+                <Upload class="h-4 w-4 mr-2" />
+                上传文件
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 文件列表内容 -->
-      <div class="flex-1 overflow-y-auto px-4 pb-2">
-        <!-- 面包屑导航 -->
-        <BreadcrumbNav :is-trigger="true" :items="breadcrumbItems" @navigate="selectFolder" />
-        <div v-if="currentContent.length === 0" class="text-center py-12">
-          <Folder class="h-12 w-12 mx-auto mb-4 text-gray-400" />
-          <h3 class="text-lg font-medium text-gray-900 mb-2">文件夹为空</h3>
-          <p class="text-gray-500 mb-4">开始上传文件或创建新文件夹</p>
-          <div class="flex justify-center space-x-2">
-            <button class="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center" @click="openCreateFolderModal()">
-              <FolderPlus class="h-4 w-4 mr-2" />
-              新建文件夹
-            </button>
-            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm flex items-center" @click="() => openUploadModal()">
-              <Upload class="h-4 w-4 mr-2" />
-              上传文件
-            </button>
+      <div class="flex-1 overflow-y-auto p-4">
+        <!-- 加载状态 -->
+        <div v-if="isLoading" class="space-y-4 opacity-100 transition-opacity duration-300">
+          <div v-for="i in 8" :key="i" class="animate-pulse">
+            <div class="flex items-center space-x-4 p-3">
+              <div class="w-6 h-6 bg-gray-200 rounded"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- 列表视图 -->
-        <div :class="viewMode === 'list' ? 'space-y-1' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4'">
-          <FileItem
-            v-for="item in currentContent"
-            :key="item.id"
-            :file="item"
-            :team-name="teamName"
-            :is-selected="selectedFiles.has(item.id)"
-            :view-mode="viewMode"
-            :renaming-id="fileListRenamingId"
-            @contextmenu="handleFileContextMenu"
-            @select="handleFileSelect"
-            @click="handleFileClick"
-            @start-rename="handleFileListStartRename"
-            @finish-rename="handleFileListFinishRename"
-            @cancel-rename="handleFileListCancelRename"
-          />
+        <!-- 文件列表 -->
+        <div v-else-if="showContent" class="opacity-100 transition-opacity duration-300">
+          <div :class="viewMode === 'list' ? 'space-y-1' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4'">
+            <FileItem
+              v-for="item in currentContent"
+              :key="item.id"
+              :file="item"
+              :team-name="teamName"
+              :is-selected="selectedFiles.has(item.id)"
+              :view-mode="viewMode"
+              :renaming-id="fileListRenamingId"
+              @contextmenu="handleFileContextMenu"
+              @select="handleFileSelect"
+              @click="handleFileClick"
+              @start-rename="handleFileListStartRename"
+              @finish-rename="handleFileListFinishRename"
+              @cancel-rename="handleFileListCancelRename"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -196,6 +205,10 @@ const fileTree = ref<FileTreeDto[]>([
     isEditable: false
   }
 ]);
+
+// 添加加载状态
+const isLoading = ref(true);
+const showContent = ref(false);
 
 // 计算属性 当前文件夹下的文件列表
 const currentContent = computed((): FileTreeDto[] => {
@@ -300,8 +313,23 @@ const handleUpdatePermissionSuccess = async (): Promise<void> => {
 };
 
 const getFileTree = async () => {
-  const res = await getFileTreeApi(parseInt(props.teamId));
-  fileTree.value[0].children = res.data;
+  try {
+    isLoading.value = true;
+    showContent.value = false;
+    const res = await getFileTreeApi(parseInt(props.teamId));
+    fileTree.value[0].children = res.data;
+  } catch (error) {
+    console.error('获取文件树失败:', error);
+  } finally {
+    // 延迟显示内容，让过渡更平滑
+    setTimeout(() => {
+      isLoading.value = false;
+      // 再延迟一点显示内容
+      setTimeout(() => {
+        showContent.value = true;
+      }, 100);
+    }, 200);
+  }
 };
 
 // 右键菜单操作
@@ -617,6 +645,41 @@ const handleBulkDownload = async () => {
   }
 };
 
+// 添加批量删除方法
+const handleBulkDelete = async () => {
+  if (selectedFiles.value.size === 0) {
+    ElMessage.warning('请先选择要删除的文件');
+    return;
+  }
+
+  const selectedFileIds = Array.from(selectedFiles.value);
+  const selectedFileInfos = currentContent.value.filter(file => selectedFileIds.includes(file.id));
+
+  try {
+    await ElMessageBox.confirm(`确定删除选中的 ${selectedFileInfos.length} 个文件吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    });
+
+    ElMessage.info('正在删除文件...');
+
+    // 逐个删除文件
+    for (const file of selectedFileInfos) {
+      await deleteFileApi(file.id);
+    }
+
+    ElMessage.success('删除成功');
+    selectedFiles.value.clear();
+    await getFileTree();
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('批量删除失败:', error);
+      ElMessage.error('删除失败，请稍后重试');
+    }
+  }
+};
+
 defineExpose({
   handleOpenChatWindow
 });
@@ -625,3 +688,46 @@ onBeforeMount(() => {
   getFileTree();
 });
 </script>
+
+<style scoped>
+/* 平滑的透明度过渡 */
+.opacity-100 {
+  opacity: 1;
+}
+
+.transition-opacity {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* 骨架屏动画优化 */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 内容淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 为内容添加淡入效果 */
+.opacity-100.transition-opacity {
+  animation: fadeIn 0.4s ease-out;
+}
+</style>

@@ -35,7 +35,8 @@ import { Editor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Avatar from '@/components/common/Avatar.vue';
-import { OnlineStatusEnum } from '@/constants/enum';
+import { OnlineStatusEnum, UploadScene } from '@/constants/enum';
+import { uploadImageApi } from '@/services/api/upload';
 
 interface TeamMember {
   id: number;
@@ -222,7 +223,7 @@ const onKeyDown = (e: KeyboardEvent) => {
 };
 
 // 粘贴图片上传
-const onPaste = (e: ClipboardEvent) => {
+const onPaste = async (e: ClipboardEvent) => {
   if (!e.clipboardData) return;
   const items = e.clipboardData.items;
   for (let i = 0; i < items.length; i++) {
@@ -230,16 +231,13 @@ const onPaste = (e: ClipboardEvent) => {
     if (item.type.indexOf('image') !== -1) {
       const file = item.getAsFile();
       if (file) {
-        // 这里可以改为上传到服务器，拿到url后插入
-        const reader = new FileReader();
-        reader.onload = ev => {
-          const src = ev.target?.result as string;
-          editor.value?.commands.insertContent({
-            type: 'image',
-            attrs: { src }
-          });
-        };
-        reader.readAsDataURL(file);
+        // 上传图片
+        const res = await uploadImageApi(file, UploadScene.CHAT_IMAGE);
+        const src = res.data.url;
+        editor.value?.commands.insertContent({
+          type: 'image',
+          attrs: { src }
+        });
       }
       e.preventDefault();
       break;
@@ -252,18 +250,15 @@ const triggerImageUpload = () => {
   fileInput.value?.click();
 };
 // 插入图片（上传/选择）
-const onImageChange = (e: Event) => {
+const onImageChange = async (e: Event) => {
   const files = (e.target as HTMLInputElement).files;
   if (files && files[0]) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const src = ev.target?.result as string;
-      editor.value?.commands.insertContent({
-        type: 'image',
-        attrs: { src }
-      });
-    };
-    reader.readAsDataURL(files[0]);
+    const res = await uploadImageApi(files[0], UploadScene.CHAT_IMAGE);
+    const src = res.data.url;
+    editor.value?.commands.insertContent({
+      type: 'image',
+      attrs: { src }
+    });
     (e.target as HTMLInputElement).value = '';
   }
 };
@@ -282,7 +277,6 @@ const insertEmoji = (emoji: string) => {
 // 处理@成员选择
 const onInput = () => {
   if (!editor.value) return;
-  console.log('onInput');
   const text = editor.value.getText();
   const cursorPos = editor.value.state.selection.anchor;
 

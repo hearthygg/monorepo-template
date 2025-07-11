@@ -35,7 +35,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   shape: 'circle',
-  showOnlineStatus: true,
+  showOnlineStatus: false,
   isGroup: false,
   bgColor: '',
   textColor: ''
