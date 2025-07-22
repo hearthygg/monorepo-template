@@ -96,6 +96,8 @@ const handleSubmit = async () => {
   await formRef.value.validate(valid => {
     if (valid) {
       loading.value = true;
+      form.parentId = props.parentId;
+      form.teamId = props.teamId;
       emit('create', { ...form });
       loading.value = false;
       handleClose();

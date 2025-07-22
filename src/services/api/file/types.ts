@@ -317,3 +317,54 @@ export interface FileContentResponseDto {
    */
   version: number;
 }
+
+/**
+ * 新建超级文档
+ */
+export interface CreateSuperDocumentDto {
+  /**
+   * 自动保存间隔（毫秒）
+   */
+  autoSaveInterval?: number;
+  /**
+   * 是否启用协作
+   */
+  collaborationEnabled?: boolean;
+  /**
+   * 文档描述
+   */
+  description?: string;
+  /**
+   * 文件扩展名
+   */
+  extension?: Extension;
+  /**
+   * 初始内容（HTML格式）
+   */
+  initialContent?: string;
+  /**
+   * 最大用户数
+   */
+  maxUsers?: number;
+  /**
+   * 父文件夹ID（可选）
+   */
+  parentId?: number;
+  /**
+   * 团队ID
+   */
+  teamId: number;
+  /**
+   * 文档标题
+   */
+  title: string;
+}
+
+/**
+ * 文件扩展名
+ */
+export enum Extension {
+  Collab = 'collab',
+  Rtdoc = 'rtdoc',
+  Sdoc = 'sdoc'
+}

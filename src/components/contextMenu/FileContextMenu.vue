@@ -105,6 +105,13 @@ const menuItems = computed<MenuItem[]>(() => {
           action: () => emit('action', 'createFolder', selectedFile)
         },
         {
+          id: 'createSuperDoc',
+          label: '新建超级文档',
+          icon: FileText,
+          shortcut: 'Enter',
+          action: () => emit('action', 'createSuperDoc', selectedFile)
+        },
+        {
           id: 'uploadFile',
           label: '上传文件',
           icon: Upload,

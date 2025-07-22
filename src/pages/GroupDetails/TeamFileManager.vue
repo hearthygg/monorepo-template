@@ -77,6 +77,10 @@
                 <Upload class="h-4 w-4 mr-2" />
                 上传文件
               </button>
+              <button class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium flex items-center transition-colors" @click="() => handlerOpenCreateSuperDocumentModal()">
+                <FileText class="h-4 w-4 mr-2" />
+                超级文档
+              </button>
             </div>
           </div>
         </div>
@@ -136,19 +140,22 @@
 
     <!-- 文件预览/编辑窗口管理器 -->
     <WindowManager />
+
+    <!-- 新建超级文档模态框 -->
+    <CreateSuperDocumentModal v-model="isCreateSuperDocumentModalOpen" :file-tree="fileTree" :team-name="teamName" :team-id="parseInt(props.teamId)" :parent-id="parentFolderId" @confirm="handleCreateSuperDocument" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeMount, nextTick } from 'vue';
-import { Search, Download, Trash2, List, Grid, FolderPlus, Upload, Folder } from 'lucide-vue-next';
+import { Search, Download, Trash2, List, Grid, FolderPlus, Upload, Folder, FileText } from 'lucide-vue-next';
 import TreeNode from './TreeNode.vue';
 import BreadcrumbNav from './BreadcrumbNav.vue';
 import FileItem from './FileItem.vue';
 import FileUploadModal from './FileUploadModal.vue';
 import CreateFolderModal from './CreateFolderModal.vue';
-import { createFolderApi, deleteFileApi, getFileTreeApi, renameFileApi, downloadFileApi, downloadMultipleFilesApi } from '@/services/api/file';
-import type { CreateFolderDto, FileTreeDto } from '@/services/api/file/types';
+import { createFolderApi, createSuperDocApi, deleteFileApi, getFileTreeApi, renameFileApi, downloadFileApi, downloadMultipleFilesApi } from '@/services/api/file';
+import type { CreateFolderDto, CreateSuperDocumentDto, FileTreeDto } from '@/services/api/file/types';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { FilePermissionLevel } from '@/constants/enum';
 import FileContextMenu from '@/components/contextMenu/FileContextMenu.vue';
@@ -159,6 +166,7 @@ import type { BreadcrumbItem } from '@/types/file';
 import WindowManager from '@/components/WindowManager/WindowManager.vue';
 import { useWindowManager } from '@/composables/useWindowManager';
 import { formatFileSize } from '@/utils/file';
+import CreateSuperDocumentModal from './CreateSuperDocumentModal.vue';
 
 const { openFileWindow } = useWindowManager();
 
@@ -179,6 +187,7 @@ const isUploadModalOpen = ref(false);
 const expandedFolders = ref<Set<number>>(new Set([0]));
 const selectedFolder = ref(0);
 const isCreateFolderModalOpen = ref(false);
+const isCreateSuperDocumentModalOpen = ref(false);
 const isUpdatePermissionModalOpen = ref(false);
 const isFilePropertiesModalOpen = ref(false);
 const renamingId = ref<number | null>(null);
@@ -299,11 +308,23 @@ const handleFileUploadSuccess = async (): Promise<void> => {
 };
 
 const handleCreateFolder = async (data: CreateFolderDto) => {
-  console.log('createFolder', selectedFolder.value);
   data.parentId = selectedFolder.value === 0 ? undefined : selectedFolder.value;
   await createFolderApi(data);
   ElMessage.success('创建成功');
   isCreateFolderModalOpen.value = false;
+  getFileTree();
+};
+
+const handlerOpenCreateSuperDocumentModal = (fileId?: number) => {
+  parentFolderId.value = fileId ?? selectedFolder.value;
+  isCreateSuperDocumentModalOpen.value = true;
+};
+
+// 新建超级文档
+const handleCreateSuperDocument = async (data: CreateSuperDocumentDto) => {
+  await createSuperDocApi(data);
+  ElMessage.success('创建成功');
+  isCreateSuperDocumentModalOpen.value = false;
   getFileTree();
 };
 
@@ -404,6 +425,10 @@ const handleContextMenuAction = async (action: string, file: FileTreeDto) => {
         // ElMessage.warning('文件不可编辑');
         // 弹出替换远程文件的窗口功能
       }
+      break;
+    case 'createSuperDoc':
+      console.log('新建超级文档');
+      handlerOpenCreateSuperDocumentModal(file.id);
       break;
     default:
       console.log(`未知操作: ${action}`);

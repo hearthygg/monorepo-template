@@ -1,6 +1,6 @@
 import http from '@/services/http';
 import type { AxiosPromise } from 'axios';
-import type { CreateFolderDto, FileContentResponseDto, FileInfoDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
+import type { CreateFolderDto, CreateSuperDocumentDto, FileContentResponseDto, FileInfoDto, FilePermissionListItemDto, FileTreeDto, UpdatePermissionsDto, UploadOptions } from './types';
 
 // 在团队空间中创建文件夹
 export const createFolderApi = (data: CreateFolderDto): AxiosPromise<any> => {
@@ -137,5 +137,14 @@ export const saveFileContentApi = (fileId: number, content: string) => {
     url: `/files/${fileId}/content`,
     method: 'put',
     data: { content }
+  });
+};
+
+// 新建超级文档
+export const createSuperDocApi = (data: CreateSuperDocumentDto): AxiosPromise<any> => {
+  return http({
+    url: `/files/super-document`,
+    method: 'post',
+    data
   });
 };

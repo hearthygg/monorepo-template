@@ -64,8 +64,9 @@
       <!-- PDF预览 - 使用新的PDFPreview组件 -->
       <PDFPreview v-else-if="file.ext === 'pdf'" :file="file" class="h-full" />
 
-      <!-- 交流中心 -->
-      <IM v-else-if="file.ext === 'chat'" />
+      <!-- 协作超级文档 -->
+      <TiptapCollaborate v-else-if="file.ext === 'sdoc'" :is-editable="isEditable" :file="file" class="h-full" />
+
       <!-- 其他文件类型 -->
       <div v-else class="h-full flex items-center justify-center bg-gray-50">
         <div class="text-center">
@@ -86,7 +87,6 @@ import { ElMessage } from 'element-plus';
 import ImagePreview from './ImagePreview.vue';
 import VideoPreview from './VideoPreview.vue';
 import PDFPreview from './PDFPreview.vue';
-import IM from '@/modules/IM/index.vue';
 import { Icon } from '@iconify/vue';
 import { getIconNameByFile } from '@/utils/file-icon-map';
 import { getFileContentApi, saveFileContentApi } from '@/services/api/file';
@@ -98,6 +98,7 @@ import { SUPPORTED_FILE_TYPES } from '@/constants/file-type';
 import type { WindowState } from '@/types/window';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import TiptapCollaborate from '@/modules/tiptapCollaborate/index.vue';
 
 interface Props {
   file: FileTreeDto;

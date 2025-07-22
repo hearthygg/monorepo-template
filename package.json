@@ -20,9 +20,12 @@
     "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/vscode-icons": "^1.2.23",
     "@iconify/vue": "^5.0.0",
-    "@tiptap/extension-image": "^2.24.1",
-    "@tiptap/starter-kit": "^2.24.1",
-    "@tiptap/vue-3": "^2.24.1",
+    "@tiptap/extension-collaboration": "^3.0.7",
+    "@tiptap/extension-collaboration-cursor": "^3.0.0",
+    "@tiptap/extension-image": "^3.0.7",
+    "@tiptap/pm": "^3.0.7",
+    "@tiptap/starter-kit": "^3.0.7",
+    "@tiptap/vue-3": "^3.0.7",
     "@vueuse/core": "^13.0.0",
     "axios": "^1.8.2",
     "date-fns": "^4.1.0",
@@ -40,7 +43,10 @@
     "viewerjs": "^1.11.7",
     "vue": "^3.5.13",
     "vue-echarts": "^7.0.3",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "y-indexeddb": "^9.0.12",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.27"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
